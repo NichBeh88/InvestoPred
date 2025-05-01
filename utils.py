@@ -153,43 +153,43 @@ def fetch_and_store_stock_data(index_name):
 
 
 def get_cached_stock_data(index_name):
-    """Loads stock data from Firestore; fetches new data if expired (runs in background)."""
+    """Loads stock data from Firestore; fetches new data if expired or missing."""
     doc_ref = db.collection("stock_cache").document(index_name)
     doc = doc_ref.get()
 
     if doc.exists:
         cache_data = doc.to_dict()
+
+        # Handle missing 'updated_at' gracefully
         if "updated_at" not in cache_data:
-            print(f"⚠️ Missing 'updated_at' in {index_name} cache. Returning last known data.")
-            return pd.DataFrame(cache_data.get("stocks", []))  # Return whatever is available
+            print(f"⚠️ Missing 'updated_at' in {index_name} cache. Returning what’s available.")
+            return pd.DataFrame(cache_data.get("stocks", []))
 
         last_updated = datetime.fromisoformat(cache_data["updated_at"])
 
+        # If cache is fresh, return it
         if datetime.now(timezone.utc) - last_updated < CACHE_EXPIRY:
             return pd.DataFrame(cache_data["stocks"])
-        
+
+        # If a fetch is already in progress, don't start a new one
         if is_fetching_in_progress(index_name):
-            print(f"⚠️ Fetch already in progress for {index_name}. Returning existing cache.")
+            print(f"🔁 Fetch in progress for expired cache of {index_name}. Returning current cache.")
             return pd.DataFrame(cache_data["stocks"])
 
-        # Cache expired → background refresh
-        print(f"🔄 {index_name} cache expired, fetching new data in background...")
-        threading.Thread(target=fetch_and_store_stock_data, args=(index_name,)).start()
+        # Cache expired and no fetch running → fetch in background
+        print(f"🔄 Cache expired for {index_name}, fetching new data in background...")
+        threading.Thread(target=fetch_and_store_stock_data, args=(index_name,), daemon=True).start()
         return pd.DataFrame(cache_data["stocks"])
 
-    # 🚫 No cached data exists — fetch synchronously, but wait for it to finish
-    if not is_fetching_in_progress(index_name):
-        print(f"⚠️ No cache found for {index_name}, fetching fresh data...")
-        fetch_and_store_stock_data(index_name)
-    
-    # ⏳ Wait for cache to become available (max 10 seconds)
-    for _ in range(20):  # 20 * 0.5s = 10 seconds
-        time.sleep(0.5)
-        doc = doc_ref.get()
-        if doc.exists and "stocks" in doc.to_dict():
-            print(f"✅ Fresh cache available for {index_name}")
-            return pd.DataFrame(doc.to_dict()["stocks"])
+    else:
+        # No cache exists → fetch if not already fetching
+        if is_fetching_in_progress(index_name):
+            print(f"🕒 No cache yet, but fetch already started for {index_name}. Returning empty placeholder.")
+            return pd.DataFrame()  # Placeholder or display “Fetching...” message in frontend
 
-    print(f"❌ Timeout waiting for fresh data for {index_name}")
-    return pd.DataFrame()  # Fallback empty DataFrame
+        # Trigger the fetch in background only once
+        print(f"🚀 No cache and no fetch in progress for {index_name}. Starting fetch...")
+        threading.Thread(target=fetch_and_store_stock_data, args=(index_name,), daemon=True).start()
+        return pd.DataFrame()  # Don’t recursively call yourself!
+
 
