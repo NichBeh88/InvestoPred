@@ -172,3 +172,21 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# ==========================
+# Firebase & Streamlit-specific
+# ==========================
+
+# Firebase credentials and secrets
+*.json
+!*.example.json
+secrets/
+firebase-adminsdk.json
+
+# Streamlit config
+.streamlit/config.toml
+
+# Logs and local runtime files
+*.log
+*.tmp
+
