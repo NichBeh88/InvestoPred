@@ -1,10 +1,17 @@
 import streamlit as st
+import sys
+import os
+
+# ✅ Ensure root directory is in sys.path so we can import utils.py
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import streamlit as st
 from navigation import navigation
 import firebase_admin
 from firebase_admin import credentials, firestore
 from auth import track_session_activity
 import pandas as pd
-from ..utils import get_top_gainers, get_top_losers, get_cached_stock_data
+from utils import get_top_gainers, get_top_losers, get_cached_stock_data
 
 track_session_activity()
 
