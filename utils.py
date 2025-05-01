@@ -159,29 +159,37 @@ def get_cached_stock_data(index_name):
 
     if doc.exists:
         cache_data = doc.to_dict()
-        # ✅ Check if 'updated_at' exists before using it
         if "updated_at" not in cache_data:
             print(f"⚠️ Missing 'updated_at' in {index_name} cache. Returning last known data.")
             return pd.DataFrame(cache_data.get("stocks", []))  # Return whatever is available
 
         last_updated = datetime.fromisoformat(cache_data["updated_at"])
 
-        # ✅ If data is fresh, return it
         if datetime.now(timezone.utc) - last_updated < CACHE_EXPIRY:
             return pd.DataFrame(cache_data["stocks"])
         
-        # ✅ If fetch is already in progress, return old cache instead of stacking requests
         if is_fetching_in_progress(index_name):
             print(f"⚠️ Fetch already in progress for {index_name}. Returning existing cache.")
             return pd.DataFrame(cache_data["stocks"])
-        
 
-        # ✅ Cache expired → Fetch fresh data in background (but return old cache)
+        # Cache expired → background refresh
         print(f"🔄 {index_name} cache expired, fetching new data in background...")
         threading.Thread(target=fetch_and_store_stock_data, args=(index_name,)).start()
         return pd.DataFrame(cache_data["stocks"])
+
+    # 🚫 No cached data exists — fetch synchronously, but wait for it to finish
+    if not is_fetching_in_progress(index_name):
+        print(f"⚠️ No cache found for {index_name}, fetching fresh data...")
+        fetch_and_store_stock_data(index_name)
     
-    # ✅ If no cached data exists, fetch immediately
-    print(f"⚠️ No cache found for {index_name}, fetching fresh data...")
-    fetch_and_store_stock_data(index_name)
-    return get_cached_stock_data(index_name)  # Load new cache after fetch
+    # ⏳ Wait for cache to become available (max 10 seconds)
+    for _ in range(20):  # 20 * 0.5s = 10 seconds
+        time.sleep(0.5)
+        doc = doc_ref.get()
+        if doc.exists and "stocks" in doc.to_dict():
+            print(f"✅ Fresh cache available for {index_name}")
+            return pd.DataFrame(doc.to_dict()["stocks"])
+
+    print(f"❌ Timeout waiting for fresh data for {index_name}")
+    return pd.DataFrame()  # Fallback empty DataFrame
+
