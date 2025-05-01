@@ -10,7 +10,8 @@ track_session_activity()
 
 # Initialize Firebase
 if not firebase_admin._apps:
-    cred = credentials.Certificate("/Users/nicholasbeh/Downloads/Stock_Web/investopred-firebase-adminsdk-fbsvc-6b373aa545.json")
+    firebase_creds = st.secrets["FIREBASE"]
+    cred = credentials.Certificate(firebase_creds)
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
