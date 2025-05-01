@@ -3,8 +3,8 @@ from navigation import navigation
 import firebase_admin
 from firebase_admin import credentials, firestore
 from auth import track_session_activity
-from yahooquery import Screener
 import pandas as pd
+from utils import get_top_gainers, get_top_losers, get_cached_stock_data
 
 track_session_activity()
 
@@ -78,98 +78,27 @@ st.title('Welcome to InvestoPred!')
 st.write('Please browse through the pages and try the functions!')
 
 
-# Function to fetch top gainers from Yahoo Finance
-def get_top_gainers():
-    screener = Screener()
-    
-    try:
-        # Fetch "day_gainers" from Yahoo Finance
-        data = screener.get_screeners("day_gainers", count=10)  # Get top 10 gainers
+# Displaying Top Gainers and Losers
+st.title("📈 Market Movers")
 
-        # Extract relevant stock data
-        stocks = data["day_gainers"]["quotes"]
-        stock_list = [
-            {
-                "Symbol": stock["symbol"],
-                "Price": float(stock["regularMarketPrice"]) if stock.get("regularMarketPrice") else 0.0,
-                "Change %": float(stock["regularMarketChangePercent"]) if stock.get("regularMarketChangePercent") else 0.0,
-                "Dividend Yield (%)": float(stock.get("dividendYield", 0)) if stock.get("dividendYield") else 0.0,
-                "Volume": int(stock["regularMarketVolume"]) if stock.get("regularMarketVolume") else 0
-            }
-            for stock in stocks
-        ]
+# Fetch top gainers and losers (this will use cached data if available)
+gainers = get_top_gainers()
+losers = get_top_losers()
 
-        # Convert to DataFrame for better display
-        df = pd.DataFrame(stock_list)
+# Display top 10 gainers
+df_gainers = pd.DataFrame(gainers)[["symbol", "name", "price", "changesPercentage", "change"]].head(10)
+df_gainers.columns = ["Symbol", "Company", "Price", "% Change", "Change ($)"]
+st.subheader("Top 10 Gainers")
+st.dataframe(df_gainers, use_container_width=True)
 
-        # Ensure all numbers have 2 decimal places
-        df["Change %"] = df["Change %"].apply(lambda x: round(x, 2))
-        df["Dividend Yield (%)"] = df["Dividend Yield (%)"].apply(lambda x: round(x, 2))
-        df["Price"] = df["Price"].apply(lambda x: round(x, 2))
-
-        # Sort by highest change percentage
-        return df.sort_values(by="Change %", ascending=False)  # Sort by highest gain
-
-    except Exception as e:
-        st.write(f"❌ Error fetching top gainers: {e}")
-        return pd.DataFrame()
-
-# Fetch and display top gainers
-top_gainers_df = get_top_gainers()
-if not top_gainers_df.empty:
-    st.write("\n📈 Top Market Gainers Today:\n")
-    st.table(top_gainers_df)
-else:
-    st.write("No data available.")
-
-
-# top losers
-def get_top_losers():
-    screener = Screener()
-    
-    try:
-        # Fetch "day_losers" from Yahoo Finance
-        data = screener.get_screeners("day_losers", count=10)  # Get top 10 losers
-
-        # Extract relevant stock data
-        stocks = data["day_losers"]["quotes"]
-        stock_list = [
-            {
-                "Symbol": stock["symbol"],
-                "Price": float(stock["regularMarketPrice"]) if stock.get("regularMarketPrice") else 0.0,
-                "Change %": float(stock["regularMarketChangePercent"]) if stock.get("regularMarketChangePercent") else 0.0,
-                "Dividend Yield (%)": float(stock.get("dividendYield", 0)) if stock.get("dividendYield") else 0.0,
-                "Volume": int(stock["regularMarketVolume"]) if stock.get("regularMarketVolume") else 0
-            }
-            for stock in stocks
-        ]
-
-        # Convert to DataFrame for better display
-        df = pd.DataFrame(stock_list)
-
-        # Ensure all numbers have 2 decimal places
-        df["Change %"] = df["Change %"].apply(lambda x: round(x, 2))
-        df["Dividend Yield (%)"] = df["Dividend Yield (%)"].apply(lambda x: round(x, 2))
-        df["Price"] = df["Price"].apply(lambda x: round(x, 2))
-
-        # Sort by highest negative change percentage
-        return df.sort_values(by="Change %", ascending=True)  # Sort by highest loss
-
-    except Exception as e:
-        st.write(f"❌ Error fetching top losers: {e}")
-        return pd.DataFrame()
-
-# Fetch and display top losers
-top_losers_df = get_top_losers()
-if not top_losers_df.empty:
-    st.write("\n📉 Top Market Losers Today:\n")
-    st.table(top_losers_df)
-else:
-    st.write("No data available.")
+# Display top 10 losers
+df_losers = pd.DataFrame(losers)[["symbol", "name", "price", "changesPercentage", "change"]].head(10)
+df_losers.columns = ["Symbol", "Company", "Price", "% Change", "Change ($)"]
+st.subheader("Top 10 Losers")
+st.dataframe(df_losers, use_container_width=True)
 
 
 
-from utils import get_cached_stock_data
 
 # Load and cache stock data when user first visits homepage
 if "SP500_data" not in st.session_state:
