@@ -77,8 +77,6 @@ st.title('Welcome to InvestoPred!')
 
 st.write('Please browse through the pages and try the functions!')
 
-st.session_state["current_page"] = "Home-Page"  # Track the page
-
 
 # Function to fetch top gainers from Yahoo Finance
 def get_top_gainers():
