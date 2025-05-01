@@ -9,8 +9,8 @@ from firebase_admin import credentials, firestore
 import threading
 
 # 🔹 File paths for stock symbol CSVs
-SP500_CSV_PATH = "/Users/nicholasbeh/Downloads/Stock_Web/sp500_companies.csv"
-FTSE100_CSV_PATH = "/Users/nicholasbeh/Downloads/Stock_Web/FTSE100_Constituents.csv"
+SP500_CSV_PATH = "sp500_companies.csv"
+FTSE100_CSV_PATH = "FTSE100_Constituents.csv"
 
 # 🔹 Initialize Firebase Firestore
 if not firebase_admin._apps:
