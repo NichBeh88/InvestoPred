@@ -11,13 +11,34 @@ from auth import track_session_activity
 
 track_session_activity()
 
-# Initialize Firebase
+# Check if Firebase has already been initialized
 if not firebase_admin._apps:
-    cred = credentials.Certificate("/Users/nicholasbeh/Downloads/Stock_Web/investopred-firebase-adminsdk-fbsvc-6b373aa545.json")
+    # Access the private key and other credentials from Streamlit secrets
+    private_key = st.secrets["FIREBASE"]["private_key"]
+    client_email = st.secrets["FIREBASE"]["client_email"]
+    project_id = st.secrets["FIREBASE"]["project_id"]
+    
+    # Create a dictionary with the credentials
+    service_account_info = {
+        "type": "service_account",
+        "project_id": project_id,
+        "private_key": private_key,
+        "client_email": client_email,
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40investopred.iam.gserviceaccount.com"
+    }
+    
+    # Initialize Firebase with the credentials
+    cred = credentials.Certificate(service_account_info)
     firebase_admin.initialize_app(cred)
+    
+else:
+    print("Firebase app is already initialized.")
 
 db = firestore.client()
-FIREBASE_API_KEY = st.secrets["api_key"]
+FIREBASE_API_KEY = st.secrets["FIREBASE"]["api_key"]
+
 
 # 🛡 Initialize session keys safely
 if "user" not in st.session_state:
