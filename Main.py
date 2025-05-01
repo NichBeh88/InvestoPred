@@ -5,12 +5,12 @@ from firebase_admin import firestore, credentials
 
 # Initialize Firebase
 if not firebase_admin._apps:
-    firebase_creds = st.secrets["FIREBASE"]
+    firebase_creds = st.secrets["FIREBASE"]["firebase_service_account"]
     cred = credentials.Certificate(firebase_creds)
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
-FIREBASE_API_KEY = st.secrets["api_key"]
+FIREBASE_API_KEY = st.secrets["FIREBASE"]["api_key"]
 
 # 🔒 Hide default Streamlit sidebar navigation
 hide_streamlit_style = """
