@@ -9,8 +9,7 @@ from datetime import datetime, timedelta, timezone
 
 # Initialize Firebase
 if not firebase_admin._apps:
-    firebase_creds = st.secrets["FIREBASE"]
-    cred = credentials.Certificate(firebase_creds)
+    cred = credentials.Certificate(st.secrets["FIREBASE"])
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
