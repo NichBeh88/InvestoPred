@@ -7,6 +7,7 @@ import time
 import firebase_admin
 from firebase_admin import credentials, firestore
 import threading
+import requests
 
 # 🔹 File paths for stock symbol CSVs
 SP500_CSV_PATH = "sp500_companies.csv"
@@ -193,3 +194,43 @@ def get_cached_stock_data(index_name):
         return pd.DataFrame()  # Don’t recursively call yourself!
 
 
+# Top gainers and losers cache
+
+# 🔹 FMP API keys
+API_KEY = st.secret["FIREBASE"]["fmp_api_key"]
+CACHE_DURATION_HOURS = 12  # Set cache expiry time to 12 hours
+
+# 🔹 Function to fetch and cache data for Top Gainers or Top Losers
+def fetch_and_cache_fmp_data(endpoint):
+    doc_ref = db.collection("market").document(endpoint)
+    doc = doc_ref.get()
+
+    now = datetime.utcnow()
+
+    # Check if cached data exists and if it is still fresh
+    if doc.exists:
+        data = doc.to_dict()
+        timestamp = datetime.fromisoformat(data["timestamp"])
+        if now - timestamp < timedelta(hours=CACHE_DURATION_HOURS):
+            return data["results"]  # Return cached data if within the expiry time
+
+    # Fetch new data from the API if cache is expired or missing
+    url = f"https://financialmodelingprep.com/api/v3/stock_market/{endpoint}?apikey={API_KEY}"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        results = response.json()
+        doc_ref.set({
+            "timestamp": now.isoformat(),
+            "results": results
+        })
+        return results
+    else:
+        # Optional fallback: return old cache data if API fails
+        return data["results"] if doc.exists else []
+
+def get_top_gainers():
+    return fetch_and_cache_fmp_data("gainers")
+
+def get_top_losers():
+    return fetch_and_cache_fmp_data("losers")
