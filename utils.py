@@ -197,7 +197,7 @@ def get_cached_stock_data(index_name):
 # Top gainers and losers cache
 
 # 🔹 FMP API keys
-API_KEY = st.secret["FIREBASE"]["fmp_api_key"]
+API_KEY = st.secrets["FIREBASE"]["fmp_api_key"]
 CACHE_DURATION_HOURS = 12  # Set cache expiry time to 12 hours
 
 # 🔹 Function to fetch and cache data for Top Gainers or Top Losers
