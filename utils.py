@@ -33,118 +33,150 @@ if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
-CACHE_EXPIRY = timedelta(minutes=30)
+CACHE_EXPIRY = timedelta(minutes=60)
 FETCH_LOCK_TIMEOUT = timedelta(minutes=5)
 
 # 🔹 Load stock symbols
-@st.cache_data
 def load_stock_symbols():
     try:
         sp500_df = pd.read_csv(SP500_CSV_PATH)
-        ftse_df = pd.read_csv(FTSE100_CSV_PATH)
-        ftse_df["Symbol"] = ftse_df["Symbol"] + ".L"
-        return {
-            "SP500": sp500_df["Symbol"].tolist(),
-            "FTSE100": ftse_df["Symbol"].tolist()
-        }
+        sp500_tickers = sp500_df["Symbol"].tolist()
+
+        ftse100_df = pd.read_csv(FTSE100_CSV_PATH)
+        ftse100_df["Symbol"] = ftse100_df["Symbol"] + ".L"  # Append ".L" for Yahoo Finance
+        ftse100_tickers = ftse100_df["Symbol"].tolist()
+
+        return {"SP500": sp500_tickers, "FTSE100": ftse100_tickers}
     except Exception as e:
         st.error(f"⚠️ Error loading stock symbols: {e}")
         return {"SP500": [], "FTSE100": []}
 
-# 🔒 Lock helpers
+# Function to check if a fetch is already in progress
 def is_fetching_in_progress(index_name):
-    ref = db.collection("stock_cache").document(f"{index_name}_fetch_status")
-    snap = ref.get()
-    if snap.exists:
-        start = datetime.fromisoformat(snap.to_dict()["StartTime"])
-        return datetime.now(timezone.utc) - start < FETCH_LOCK_TIMEOUT
+    fetch_status_ref = db.collection("stock_cache").document(f"{index_name}_fetch_status")
+    fetch_status = fetch_status_ref.get()
+    if fetch_status.exists:
+        data = fetch_status.to_dict()
+        last_fetch_start = datetime.fromisoformat(data["StartTime"])
+        return datetime.now(timezone.utc) - last_fetch_start < FETCH_LOCK_TIMEOUT
     return False
 
-def update_fetch_status(index_name, status):
-    ref = db.collection("stock_cache").document(f"{index_name}_fetch_status")
-    if status == "start":
-        ref.set({"StartTime": datetime.now(timezone.utc).isoformat()})
-    elif status == "done":
-        ref.delete()
 
-# 🔁 Save to Firestore
+# Function to update Firestore fetch status
+def update_fetch_status(index_name, status):
+    fetch_status_ref = db.collection("stock_cache").document(f"{index_name}_fetch_status")
+    if status == "start":
+        fetch_status_ref.set({"StartTime": datetime.now(timezone.utc).isoformat()})
+    elif status == "done":
+        fetch_status_ref.delete()
+
+# 🔹 Function to fetch cached stock data from Firestore
+def get_firestore_cache(index_name):
+    doc_ref = db.collection("stock_cache").document(index_name)
+    doc = doc_ref.get()
+    if doc.exists:
+        data = doc.to_dict()
+        last_updated = datetime.strptime(data["LastUpdated"], "%Y-%m-%d %H:%M:%S")
+
+        if datetime.now() - last_updated < CACHE_EXPIRY:
+            return pd.DataFrame(data["StockData"])  # Return cached data
+
+    return None  # Cache expired or missing
+
+# 🔹 Function to save stock data to Firestore
 def save_to_firestore(index_name, stock_data):
     doc_ref = db.collection("stock_cache").document(index_name)
     doc_ref.set({
-        "stocks": stock_data.to_dict(orient="records"),
-        "updated_at": datetime.now(timezone.utc).isoformat()
+        "StockData": stock_data.to_dict(orient="records"),
+        "LastUpdated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     })
+    print(f"✅ Firestore cache updated for {index_name} at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
-# 🚀 Fetch using yf.download
 def fetch_and_store_stock_data(index_name):
     if is_fetching_in_progress(index_name):
         return
 
     update_fetch_status(index_name, "start")
-    symbols = load_stock_symbols().get(index_name, [])
+    stock_symbols = load_stock_symbols().get(index_name, [])
     stock_data = []
 
-    try:
-        # Fetch batch price data for all symbols
-        df = yf.download(
-            tickers=symbols,
-            period="1d",
-            interval="1d",
-            group_by="ticker",
-            threads=True,
-            progress=False
-        )
+    batch_size = 25  # smaller to reduce pressure
 
-        for symbol in symbols:
-            try:
-                price = df[symbol]["Close"][-1] if symbol in df else None
-                stock_data.append({
-                    "Symbol": symbol,
-                    "Price": round(price, 2) if price else None,
-                    "Company Name": symbol,
-                    "Sector": "Unknown",
-                    "P/E Ratio": None,
-                    "Dividend Yield (%)": None,
-                    "EPS": None,
-                    "Market Cap": None
-                })
-            except Exception as e:
-                print(f"⚠️ Error with {symbol}: {e}")
+    try:
+        for i in range(0, len(stock_symbols), batch_size):
+            batch_tickers = stock_symbols[i:i + batch_size]
+            tickers = yf.Tickers(" ".join(batch_tickers))
+
+            for symbol in batch_tickers:
+                try:
+                    ticker = tickers.tickers[symbol]
+
+                    # Use fast_info for speed & safety
+                    fast_info = getattr(ticker, "fast_info", {})
+                    info = ticker.info  # fallback
+
+                    stock_data.append({
+                        "Symbol": symbol,
+                        "Company Name": info.get("shortName", "N/A"),
+                        "Sector": info.get("sector", "Unknown"),
+                        "Price": fast_info.get("last_price", info.get("previousClose", None)),
+                        "P/E Ratio": info.get("trailingPE", None),
+                        "Dividend Yield (%)": round(info.get("dividendYield", 0) * 100, 2) if info.get("dividendYield") else 0,
+                        "EPS": info.get("trailingEps", None),
+                        "Market Cap": info.get("marketCap", None),
+                    })
+
+                    time.sleep(0.2)  # small delay between calls
+
+                except Exception as e:
+                    print(f"⚠️ Error fetching {symbol}: {e}")
+                    continue
 
         if stock_data:
-            save_to_firestore(index_name, pd.DataFrame(stock_data))
-            print(f"✅ {index_name} updated.")
+            db.collection("stock_cache").document(index_name).set({
+                "stocks": stock_data,
+                "updated_at": datetime.now(timezone.utc).isoformat()
+            })
+            print(f"✅ {index_name} stock data updated in Firestore.")
 
     except Exception as e:
-        print(f"❌ Fetch failed for {index_name}: {e}")
+        print(f"🔥 Error during batch fetch for {index_name}: {e}")
+
     finally:
         update_fetch_status(index_name, "done")
 
-# 🧠 Main function for external use
+
 def get_cached_stock_data(index_name):
     doc_ref = db.collection("stock_cache").document(index_name)
     doc = doc_ref.get()
 
     if doc.exists:
-        data = doc.to_dict()
-        if "updated_at" not in data:
-            return pd.DataFrame(data.get("stocks", []))
+        cache_data = doc.to_dict()
+        if "updated_at" not in cache_data:
+            print(f"⚠️ Missing 'updated_at' in {index_name} cache.")
+            return pd.DataFrame(cache_data.get("stocks", []))
 
-        last_updated = datetime.fromisoformat(data["updated_at"])
+        last_updated = datetime.fromisoformat(cache_data["updated_at"])
+
         if datetime.now(timezone.utc) - last_updated < CACHE_EXPIRY:
-            return pd.DataFrame(data["stocks"])
+            return pd.DataFrame(cache_data["stocks"])
 
-        if not is_fetching_in_progress(index_name):
-            print(f"⏳ Refreshing {index_name} cache...")
-            threading.Thread(target=fetch_and_store_stock_data, args=(index_name,), daemon=True).start()
+        if is_fetching_in_progress(index_name):
+            print(f"🔁 Fetch in progress for {index_name}, using stale cache.")
+            return pd.DataFrame(cache_data["stocks"])
 
-        return pd.DataFrame(data["stocks"])
-
-    if not is_fetching_in_progress(index_name):
-        print(f"📡 No cache for {index_name}. Fetching...")
+        print(f"🔄 Cache expired for {index_name}, fetching in background...")
         threading.Thread(target=fetch_and_store_stock_data, args=(index_name,), daemon=True).start()
+        return pd.DataFrame(cache_data["stocks"])
 
-    return pd.DataFrame()  # Placeholder
+    else:
+        if is_fetching_in_progress(index_name):
+            print(f"🕒 No cache yet, fetch already started for {index_name}.")
+            return pd.DataFrame()
+
+        print(f"🚀 Starting fetch for new cache: {index_name}")
+        threading.Thread(target=fetch_and_store_stock_data, args=(index_name,), daemon=True).start()
+        return pd.DataFrame()
 
 
 # Top gainers and losers cache
