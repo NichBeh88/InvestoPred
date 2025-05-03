@@ -51,23 +51,22 @@ def load_stock_symbols():
 # 🔹 Function to get cached stock data from Firestore
 def get_cached_stock_data(index_name):
     try:
-        doc_ref = db.collection("stock_cache").document(index_name)
-        doc = doc_ref.get()
+        stock_collection = db.collection(index_name).document("stocks").collections()
 
-        if not doc.exists:
-            st.warning(f"No cached data found for {index_name}. Please wait until backend updates.")
+        all_data = []
+        for collection in stock_collection:
+            for doc in collection.stream():
+                stock_data = doc.to_dict()
+                all_data.append(stock_data)
+
+        if not all_data:
+            st.warning(f"No stock data found in Firestore for {index_name}/stocks.")
             return pd.DataFrame()
 
-        data = doc.to_dict()
-        last_updated = datetime.fromisoformat(data.get("updated_at", "1970-01-01T00:00:00Z"))
-
-        if datetime.now(timezone.utc) - last_updated > CACHE_EXPIRY:
-            st.info(f"Cached data for {index_name} is older than 1 hour.")
-
-        return pd.DataFrame(data.get("stocks", []))
+        return pd.DataFrame(all_data)
 
     except Exception as e:
-        st.error(f"❌ Error reading Firestore cache for {index_name}: {e}")
+        st.error(f"❌ Error fetching stock data from Firestore folder {index_name}/stocks: {e}")
         return pd.DataFrame()
 
 
