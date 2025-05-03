@@ -12,8 +12,6 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 from auth import track_session_activity
 
-track_session_activity()
-
 # Hide Streamlit's default multipage navigation
 hide_streamlit_style = """
     <style>
@@ -50,6 +48,7 @@ else:
 db = firestore.client()
 FIREBASE_API_KEY = st.secrets["FIREBASE"]["api_key"]
 
+track_session_activity()
 
 # 🛡 Initialize session keys safely
 if "user" not in st.session_state:
