@@ -101,7 +101,7 @@ pe_min = st.sidebar.number_input("Min P/E", value=np.nan)
 pe_max = st.sidebar.number_input("Max P/E", value=np.nan)
 dy_min = st.sidebar.number_input("Min Dividend Yield (%)", value=np.nan)
 eps_min = st.sidebar.number_input("Min EPS (£)", value=np.nan)
-sector = st.sidebar.selectbox("Sector", ["All"] + list(financial_df["Sector"].dropna().unique()))
+sector = st.sidebar.selectbox("Sector", ["All"] + list(financial_df["sector"].dropna().unique()))
 
 # Apply Filters
 filtered_stocks = financial_df.copy()
