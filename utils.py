@@ -48,25 +48,26 @@ def load_stock_symbols():
         st.error(f"⚠️ Error loading stock symbols: {e}")
         return {"SP500": [], "FTSE100": []}
 
-# 🔹 Function to get cached stock data from Firestore
+# 🔹 Get cached stock data from Firestore
 def get_cached_stock_data(index_name):
+    """
+    index_name should be either 'sp500' or 'ftse100'
+    """
     try:
-        stock_collection = db.collection("stock_cache").document(index_name)
-
-        all_data = []
-        for collection in stock_collection:
-            for doc in collection.stream():
-                stock_data = doc.to_dict()
-                all_data.append(stock_data)
-
-        if not all_data:
-            st.warning(f"No stock data found in Firestore for {index_name}/stocks.")
+        doc_ref = db.collection("stock_cache").document(index_name)
+        doc = doc_ref.get()
+        if doc.exists:
+            data = doc.to_dict()
+            if "stocks" in data:
+                return pd.DataFrame(data["stocks"])
+            else:
+                st.warning(f"⚠️ No 'stocks' field found in Firestore document {index_name}.")
+                return pd.DataFrame()
+        else:
+            st.warning(f"⚠️ Document {index_name} does not exist in Firestore.")
             return pd.DataFrame()
-
-        return pd.DataFrame(all_data)
-
     except Exception as e:
-        st.error(f"❌ Error fetching stock data from Firestore folder {index_name}/stocks: {e}")
+        st.error(f"❌ Error fetching stock data from Firestore document {index_name}: {e}")
         return pd.DataFrame()
 
 
