@@ -89,7 +89,7 @@ if st.session_state.get("logout_triggered", False):
     st.switch_page("pages/Home-Page.py")  # Redirect immediately
 
 # ✅ Fetch cached stock data (from utils.py)
-financial_df = get_cached_stock_data("FTSE100")
+financial_df = get_cached_stock_data("ftse100")
 
 # Streamlit UI Setup
 st.title("🇬🇧 FTSE100 Stock Screener & Prediction")
