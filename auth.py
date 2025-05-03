@@ -182,7 +182,7 @@ def reset_password(email):
         st.error(f"⚠ Error: {str(e)}")
 
 
-INACTIVITY_TIMEOUT_MINUTES = 1
+INACTIVITY_TIMEOUT_MINUTES = 15
 
 def track_session_activity():
     if "authenticated" in st.session_state and st.session_state["authenticated"]:
