@@ -51,7 +51,7 @@ def load_stock_symbols():
 # 🔹 Function to get cached stock data from Firestore
 def get_cached_stock_data(index_name):
     try:
-        stock_collection = db.collection(index_name).document("stocks").collections()
+        stock_collection = db.collection("stock_cache").document(index_name).document("stocks").collections()
 
         all_data = []
         for collection in stock_collection:
