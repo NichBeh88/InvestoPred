@@ -137,7 +137,7 @@ if st.button("Predict Price"):
     scaled_prices = scaler.fit_transform(prices)
     
     # Load pre-trained LSTM model
-    model = load_model('/Users/nicholasbeh/Downloads/Stock_Web/pages/predict_model.keras') 
+    model = load_model('predict_model.keras') 
     
     # Predict next 90 days
     time_step = 60
