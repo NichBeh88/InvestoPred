@@ -127,8 +127,8 @@ def get_financial_data(stock):
         return None
 
 if st.button("Compare & Predict Stocks"):
-    with st.status(f"Fetching data for {stock1} and {stock2}..."):
-
+        with st.status(f"Fetching data for {stock1} and {stock2}...", expanded=False) as status):
+    
         # Get financial data
         stock1_data = get_financial_data(stock1)
         stock2_data = get_financial_data(stock2)
@@ -231,8 +231,9 @@ if st.button("Compare & Predict Stocks"):
                 ax2.set_ylabel("Price")
                 ax2.legend()
                 st.pyplot(fig2)
-    
+                
+            status.update(label="✅ Done!", state="complete", expanded=False)
         else:
             st.warning("⚠️ Failed to fetch stock data for one or both stocks.")
+            status.update(label="❌ Failed to fetch data", state="error", expanded=True)
 
-    st.success("Success!")
