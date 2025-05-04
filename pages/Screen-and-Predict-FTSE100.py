@@ -126,7 +126,7 @@ st.write(f"Total Stocks Matched: **{len(filtered_stocks)}**")
 
 # Stock Prediction Section
 st.subheader("📉 Stock Price Prediction")
-selected_stock = st.selectbox("Select a stock for prediction:", filtered_stocks["Symbol"].tolist())
+selected_stock = st.selectbox("Select a stock for prediction:", filtered_stocks["symbol"].tolist())
 
 if st.button("Predict Price"):
     st.write(f"Fetching {selected_stock} stock data...")
