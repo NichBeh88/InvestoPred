@@ -130,7 +130,7 @@ st.subheader("📉 Stock Price Prediction")
 selected_stock = st.selectbox("Select a stock for prediction:", filtered_stocks["symbol"].tolist())
 
 if st.button("Predict Price"):
-    with st.status(f"Predicting {stock}. Accio!!"), expanded=False) as status:
+    with st.status(f"Predicting {stock}. Accio!!", expanded=False) as status:
         data = yf.download(selected_stock, start='2001-01-01', end=datetime.today().strftime('%Y-%m-%d'))
         prices = data['Close'].values.reshape(-1, 1)
         
