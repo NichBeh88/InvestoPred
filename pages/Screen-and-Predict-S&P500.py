@@ -89,7 +89,7 @@ if st.session_state.get("logout_triggered", False):
     st.switch_page("pages/Home-Page.py")  # Redirect immediately
 
 # ✅ Load cached stock data (no need to fetch from yfinance every time)
-financial_df = get_cached_stock_data("SP500")
+financial_df = get_cached_stock_data("sp500")
 
 # Streamlit UI Setup
 st.title("🇺🇸 S&P 500 Stock Screener & Prediction")
@@ -102,24 +102,24 @@ pe_min = st.sidebar.number_input("Min P/E", value=np.nan)
 pe_max = st.sidebar.number_input("Max P/E", value=np.nan)
 dy_min = st.sidebar.number_input("Min Dividend Yield (%)", value=np.nan)
 eps_min = st.sidebar.number_input("Min EPS ($)", value=np.nan)
-sector = st.sidebar.selectbox("Sector", ["All"] + list(financial_df["Sector"].dropna().unique()))
+sector = st.sidebar.selectbox("Sector", ["All"] + list(financial_df["sector"].dropna().unique()))
 
 # Apply Filters
 filtered_stocks = financial_df.copy()
 if not np.isnan(price_min):
-    filtered_stocks = filtered_stocks[filtered_stocks["Price"] >= price_min]
+    filtered_stocks = filtered_stocks[filtered_stocks["price"] >= price_min]
 if not np.isnan(price_max):
-    filtered_stocks = filtered_stocks[filtered_stocks["Price"] <= price_max]
+    filtered_stocks = filtered_stocks[filtered_stocks["price"] <= price_max]
 if not np.isnan(pe_min):
-    filtered_stocks = filtered_stocks[filtered_stocks["P/E Ratio"] >= pe_min]
+    filtered_stocks = filtered_stocks[filtered_stocks["peRatio"] >= pe_min]
 if not np.isnan(pe_max):
-    filtered_stocks = filtered_stocks[filtered_stocks["P/E Ratio"] <= pe_max]
+    filtered_stocks = filtered_stocks[filtered_stocks["peRatio"] <= pe_max]
 if not np.isnan(dy_min):
-    filtered_stocks = filtered_stocks[filtered_stocks["Dividend Yield (%)"] >= dy_min]
+    filtered_stocks = filtered_stocks[filtered_stocks["dividendYield"] >= dy_min]
 if not np.isnan(eps_min):
-    filtered_stocks = filtered_stocks[filtered_stocks["EPS"] >= eps_min]
+    filtered_stocks = filtered_stocks[filtered_stocks["eps"] >= eps_min]
 if sector != "All":
-    filtered_stocks = filtered_stocks[filtered_stocks["Sector"] == sector]
+    filtered_stocks = filtered_stocks[filtered_stocks["sector"] == sector]
 
 st.subheader("📈 Filtered Stocks")
 st.dataframe(filtered_stocks)
@@ -127,7 +127,7 @@ st.write(f"Total Stocks Matched: **{len(filtered_stocks)}**")
 
 # Stock Prediction Section
 st.subheader("📉 Stock Price Prediction")
-selected_stock = st.selectbox("Select a stock for prediction:", filtered_stocks["Symbol"].tolist())
+selected_stock = st.selectbox("Select a stock for prediction:", filtered_stocks["symbol"].tolist())
 
 if st.button("Predict Price"):
     st.write(f"Fetching {selected_stock} stock data...")
