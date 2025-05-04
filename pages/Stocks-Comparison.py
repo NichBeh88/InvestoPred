@@ -193,44 +193,43 @@ if st.button("Compare & Predict Stocks"):
                 return scaler.inverse_transform(np.array(future_predictions).reshape(-1, 1))
     
             # Predict stock prices for next 90 days
-            with st.status(f"Predicting {stock1} & {stock2} stock prices...", expanded=False) as status:
-                future_predictions1 = predict_stock(stock1, data1)
-                future_predictions2 = predict_stock(stock2, data2)
-                future_dates = pd.date_range(start=data1.index[-1] + timedelta(days=1), periods=90)
-        
-                # Plot future stock predictions
-                st.subheader("📅 Next 90 Days Forecast")
-                fig, ax = plt.subplots(figsize=(12, 5))
-                ax.plot(future_dates, future_predictions1, color='blue', label=f"{stock1} Prediction")
-                ax.plot(future_dates, future_predictions2, color='red', label=f"{stock2} Prediction")
-                ax.set_title(f"{stock1} vs {stock2} - Predicted Stock Prices (Next 90 Days)")
-                ax.set_xlabel("Date")
-                ax.set_ylabel("Price")
-                ax.legend()
-                st.pyplot(fig)
-        
-                # Plot individual stock predictions
-                col1, col2 = st.columns(2)
-        
-                with col1:
-                    st.subheader(f"📈 {stock1} Prediction (Next 90 Days)")
-                    fig1, ax1 = plt.subplots(figsize=(6, 4))
-                    ax1.plot(future_dates, future_predictions1, color='blue', label=f"{stock1} Prediction")
-                    ax1.set_xlabel("Date")
-                    plt.xticks(rotation=45)
-                    ax1.set_ylabel("Price")
-                    ax1.legend()
-                    st.pyplot(fig1)
-        
-                with col2:
-                    st.subheader(f"📉 {stock2} Prediction (Next 90 Days)")
-                    fig2, ax2 = plt.subplots(figsize=(6, 4))
-                    ax2.plot(future_dates, future_predictions2, color='red', label=f"{stock2} Prediction")
-                    ax2.set_xlabel("Date")
-                    plt.xticks(rotation=45)
-                    ax2.set_ylabel("Price")
-                    ax2.legend()
-                    st.pyplot(fig2)
+            future_predictions1 = predict_stock(stock1, data1)
+            future_predictions2 = predict_stock(stock2, data2)
+            future_dates = pd.date_range(start=data1.index[-1] + timedelta(days=1), periods=90)
+    
+            # Plot future stock predictions
+            st.subheader("📅 Next 90 Days Forecast")
+            fig, ax = plt.subplots(figsize=(12, 5))
+            ax.plot(future_dates, future_predictions1, color='blue', label=f"{stock1} Prediction")
+            ax.plot(future_dates, future_predictions2, color='red', label=f"{stock2} Prediction")
+            ax.set_title(f"{stock1} vs {stock2} - Predicted Stock Prices (Next 90 Days)")
+            ax.set_xlabel("Date")
+            ax.set_ylabel("Price")
+            ax.legend()
+            st.pyplot(fig)
+    
+            # Plot individual stock predictions
+            col1, col2 = st.columns(2)
+    
+            with col1:
+                st.subheader(f"📈 {stock1} Prediction (Next 90 Days)")
+                fig1, ax1 = plt.subplots(figsize=(6, 4))
+                ax1.plot(future_dates, future_predictions1, color='blue', label=f"{stock1} Prediction")
+                ax1.set_xlabel("Date")
+                plt.xticks(rotation=45)
+                ax1.set_ylabel("Price")
+                ax1.legend()
+                st.pyplot(fig1)
+    
+            with col2:
+                st.subheader(f"📉 {stock2} Prediction (Next 90 Days)")
+                fig2, ax2 = plt.subplots(figsize=(6, 4))
+                ax2.plot(future_dates, future_predictions2, color='red', label=f"{stock2} Prediction")
+                ax2.set_xlabel("Date")
+                plt.xticks(rotation=45)
+                ax2.set_ylabel("Price")
+                ax2.legend()
+                st.pyplot(fig2)
 
         else:
             st.warning("⚠️ Failed to fetch stock data for one or both stocks.")
