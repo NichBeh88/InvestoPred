@@ -109,7 +109,7 @@ st.dataframe(df_losers, use_container_width=True)
 
 # Load and cache stock data when user first visits homepage
 if "SP500_data" not in st.session_state:
-    st.session_state["SP500_data"] = get_cached_stock_data("SP500")
+    st.session_state["SP500_data"] = get_cached_stock_data("sp500")
 
 if "FTSE100_data" not in st.session_state:
-    st.session_state["FTSE100_data"] = get_cached_stock_data("FTSE100")
+    st.session_state["FTSE100_data"] = get_cached_stock_data("ftse100")
