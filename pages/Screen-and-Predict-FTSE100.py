@@ -129,41 +129,43 @@ st.subheader("📉 Stock Price Prediction")
 selected_stock = st.selectbox("Select a stock for prediction:", filtered_stocks["symbol"].tolist())
 
 if st.button("Predict Price"):
-    st.write(f"Fetching {selected_stock} stock data...")
-    data = yf.download(selected_stock, start='2001-01-01', end=datetime.today().strftime('%Y-%m-%d'))
-    prices = data['Close'].values.reshape(-1, 1)
-    
-    scaler = MinMaxScaler(feature_range=(0, 1))
-    scaled_prices = scaler.fit_transform(prices)
-    
-    # Load pre-trained LSTM model
-    model = load_model('predict_model.keras') 
-    
-    # Predict next 90 days
-    time_step = 60
-    last_sequence = scaled_prices[-time_step:]
-    future_predictions = []
-    for _ in range(90):
-        last_sequence_reshaped = last_sequence.reshape(1, time_step, 1)
-        next_price = model.predict(last_sequence_reshaped)
-        next_price = np.maximum(next_price, 0)
-        future_predictions.append(next_price[0, 0])
-        last_sequence = np.append(last_sequence[1:], next_price, axis=0)
-    
-    future_predictions = scaler.inverse_transform(np.array(future_predictions).reshape(-1, 1))
-    future_dates = pd.date_range(start=data.index[-1] + timedelta(days=1), periods=90)
-    
-    # Plot Predictions
-    st.subheader("📅 Next 90 Days Forecast")
-    fig, ax = plt.subplots(figsize=(12, 5))
-    ax.plot(future_dates, future_predictions, color='green', label='Predicted Price (£)')
-    ax.set_title(f"{selected_stock} - Predicted Stock Price (Next 90 Days)")
-    ax.set_xlabel("Date")
-    ax.set_ylabel("Price (£)")
-    ax.legend()
-    st.pyplot(fig)
-    
-    st.success("Prediction Complete!")
-    st.write("Download predictions below:")
-    forecast_df = pd.DataFrame({"Date": future_dates, "Predicted Price (£)": future_predictions.flatten()})
-    st.download_button(label="Download CSV", data=forecast_df.to_csv(index=False), file_name=f"{selected_stock}_forecast.csv", mime='text/csv')
+    with st.status(f"Fetching data for {selected_stock}", expanded=False) as status:
+        data = yf.download(selected_stock, start='2001-01-01', end=datetime.today().strftime('%Y-%m-%d'))
+        prices = data['Close'].values.reshape(-1, 1)
+        
+        scaler = MinMaxScaler(feature_range=(0, 1))
+        scaled_prices = scaler.fit_transform(prices)
+        
+        # Load pre-trained LSTM model
+        model = load_model('predict_model.keras') 
+        
+        # Predict next 90 days
+        time_step = 60
+        last_sequence = scaled_prices[-time_step:]
+        future_predictions = []
+        for _ in range(90):
+            last_sequence_reshaped = last_sequence.reshape(1, time_step, 1)
+            next_price = model.predict(last_sequence_reshaped)
+            next_price = np.maximum(next_price, 0)
+            future_predictions.append(next_price[0, 0])
+            last_sequence = np.append(last_sequence[1:], next_price, axis=0)
+        
+        future_predictions = scaler.inverse_transform(np.array(future_predictions).reshape(-1, 1))
+        future_dates = pd.date_range(start=data.index[-1] + timedelta(days=1), periods=90)
+        
+        # Plot Predictions
+        st.subheader("📅 Next 90 Days Forecast")
+        fig, ax = plt.subplots(figsize=(12, 5))
+        ax.plot(future_dates, future_predictions, color='green', label='Predicted Price (£)')
+        ax.set_title(f"{selected_stock} - Predicted Stock Price (Next 90 Days)")
+        ax.set_xlabel("Date")
+        ax.set_ylabel("Price (£)")
+        ax.legend()
+        st.pyplot(fig)
+        
+        st.success("Prediction Complete!")
+        st.write("Download predictions below:")
+        forecast_df = pd.DataFrame({"Date": future_dates, "Predicted Price (£)": future_predictions.flatten()})
+        st.download_button(label="Download CSV", data=forecast_df.to_csv(index=False), file_name=f"{selected_stock}_forecast.csv", mime='text/csv')
+
+        status.update(label="✅ Done!", state="complete", expanded=True)
