@@ -193,7 +193,7 @@ if st.button("Compare & Predict Stocks"):
                 return scaler.inverse_transform(np.array(future_predictions).reshape(-1, 1))
     
             # Predict stock prices for next 90 days
-            with st.status(f"Predicting {stock} stock prices..."), expanded=False) as status:
+            with st.status(f"Predicting {stock} stock prices...", expanded=False) as status:
                 future_predictions1 = predict_stock(stock1, data1)
                 future_predictions2 = predict_stock(stock2, data2)
                 future_dates = pd.date_range(start=data1.index[-1] + timedelta(days=1), periods=90)
