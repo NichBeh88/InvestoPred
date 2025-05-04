@@ -193,7 +193,7 @@ if st.button("Compare & Predict Stocks"):
                 return scaler.inverse_transform(np.array(future_predictions).reshape(-1, 1))
     
             # Predict stock prices for next 90 days
-            with st.status(f"Predicting {stock} stock prices...", expanded=False) as status:
+            with st.status(f"Predicting {stock1} & {stock2} stock prices...", expanded=False) as status:
                 future_predictions1 = predict_stock(stock1, data1)
                 future_predictions2 = predict_stock(stock2, data2)
                 future_dates = pd.date_range(start=data1.index[-1] + timedelta(days=1), periods=90)
@@ -231,9 +231,9 @@ if st.button("Compare & Predict Stocks"):
                     ax2.set_ylabel("Price")
                     ax2.legend()
                     st.pyplot(fig2)
-                    
-                status.update(label="✅ Done!", state="complete", expanded=True)
+
         else:
             st.warning("⚠️ Failed to fetch stock data for one or both stocks.")
             status.update(label="❌ Failed to fetch data", state="error", expanded=True)
-
+    
+    status.update(label="✅ Done!", state="complete", expanded=True)
