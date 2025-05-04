@@ -127,7 +127,7 @@ def get_financial_data(stock):
         return None
 
 if st.button("Compare & Predict Stocks"):
-        with st.status(f"Fetching data for {stock1} and {stock2}...", expanded=False) as status):
+        with st.status(f"Fetching data for {stock1} and {stock2}...", expanded=False) as status:
     
         # Get financial data
         stock1_data = get_financial_data(stock1)
