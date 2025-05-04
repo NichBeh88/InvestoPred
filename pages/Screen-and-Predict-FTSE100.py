@@ -106,19 +106,19 @@ sector = st.sidebar.selectbox("Sector", ["All"] + list(financial_df["sector"].dr
 # Apply Filters
 filtered_stocks = financial_df.copy()
 if not np.isnan(price_min):
-    filtered_stocks = filtered_stocks[filtered_stocks["Price"] >= price_min]
+    filtered_stocks = filtered_stocks[filtered_stocks["price"] >= price_min]
 if not np.isnan(price_max):
-    filtered_stocks = filtered_stocks[filtered_stocks["Price"] <= price_max]
+    filtered_stocks = filtered_stocks[filtered_stocks["price"] <= price_max]
 if not np.isnan(pe_min):
-    filtered_stocks = filtered_stocks[filtered_stocks["P/E Ratio"] >= pe_min]
+    filtered_stocks = filtered_stocks[filtered_stocks["peRatio"] >= pe_min]
 if not np.isnan(pe_max):
-    filtered_stocks = filtered_stocks[filtered_stocks["P/E Ratio"] <= pe_max]
+    filtered_stocks = filtered_stocks[filtered_stocks["peRatio"] <= pe_max]
 if not np.isnan(dy_min):
-    filtered_stocks = filtered_stocks[filtered_stocks["Dividend Yield (%)"] >= dy_min]
+    filtered_stocks = filtered_stocks[filtered_stocks["dividendYield"] >= dy_min]
 if not np.isnan(eps_min):
-    filtered_stocks = filtered_stocks[filtered_stocks["EPS"] >= eps_min]
+    filtered_stocks = filtered_stocks[filtered_stocks["eps"] >= eps_min]
 if sector != "All":
-    filtered_stocks = filtered_stocks[filtered_stocks["Sector"] == sector]
+    filtered_stocks = filtered_stocks[filtered_stocks["sector"] == sector]
 
 st.subheader("📈 Filtered Stocks")
 st.dataframe(filtered_stocks)
