@@ -109,8 +109,8 @@ def get_tickers(filepath):
     base_path = os.path.dirname(__file__)
     return pd.read_csv(filepath)["Symbol"].tolist()
 
-sp500_tickers = get_tickers("/Users/nicholasbeh/Downloads/Stock_Web/sp500_companies.csv")
-ftse100_tickers = get_tickers("/Users/nicholasbeh/Downloads/Stock_Web/FTSE100_Constituents.csv")
+sp500_tickers = get_tickers("sp500_companies.csv")
+ftse100_tickers = get_tickers("FTSE100_Constituents.csv")
 all_tickers = sorted(set(sp500_tickers + ftse100_tickers))
 
 # Watchlist functionality
