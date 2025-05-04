@@ -88,9 +88,9 @@ st.title("📊 Stock Comparisons & Predictions")
 @st.cache_data
 def load_stock_symbols(index="sp500"):
     if index == "sp500":
-        df = pd.read_csv("/Users/nicholasbeh/Downloads/Stock_Web/sp500_companies.csv")
+        df = pd.read_csv("sp500_companies.csv")
     else:
-        df = pd.read_csv("/Users/nicholasbeh/Downloads/Stock_Web/FTSE100_Constituents.csv")
+        df = pd.read_csv("FTSE100_Constituents.csv")
         df["Symbol"] = df["Symbol"] + ".L"  # Convert to Yahoo Finance format
 
     return df["Symbol"].tolist()
@@ -172,7 +172,7 @@ if st.button("Compare & Predict Stocks"):
         st.pyplot(fig2)
 
         # Load prediction model
-        model = load_model('/Users/nicholasbeh/Downloads/Stock_Web/pages/predict_model.keras')
+        model = load_model('predict_model.keras')
 
         def predict_stock(stock, data):
             st.write(f"Predicting {stock} stock prices...")
