@@ -138,6 +138,7 @@ if st.session_state.get("authenticated", False):
         st.subheader(f"📌 Watchlist: {first_watchlist_name}")
 
         if tickers:
+            data = []
             for ticker in tickers:
                 try:
                     stock = yf.Ticker(ticker)
@@ -147,17 +148,22 @@ if st.session_state.get("authenticated", False):
                     today_price = hist["Close"].iloc[-1]
                     yesterday_price = hist["Close"].iloc[-2]
                     change_pct = ((today_price - yesterday_price) / yesterday_price) * 100
-
-                    col1, col2, col3 = st.columns([2, 1, 1])
-                    with col1:
-                        st.markdown(f"**{ticker}**")
-                    with col2:
-                        st.markdown(f"Price: ${today_price:.2f}")
-                    with col3:
-                        change_color = "green" if change_pct >= 0 else "red"
-                        st.markdown(f"<span style='color:{change_color}'>Change: {change_pct:.2f}%</span>", unsafe_allow_html=True)
+            
+                    data.append({
+                        "Ticker": ticker,
+                        "Price ($)": round(today_price, 2),
+                        "Change (%)": round(change_pct, 2),
+                        "Direction": "🔺" if change_pct > 0 else "🔻"
+                    })
                 except Exception as e:
-                    st.warning(f"⚠️ Error loading {ticker}: {e}")
+                    continue
+            
+            df = pd.DataFrame(data)
+            df["Change (%)"] = df["Change (%)"].map(lambda x: f"{x:+.2f}%")
+            st.dataframe(df.style
+                .applymap(lambda v: "color: green" if isinstance(v, str) and "+" in v else "color: red", subset=["Change (%)"])
+                .hide(axis="index")
+            )
         else:
             st.info("This watchlist is empty.")
     else:
