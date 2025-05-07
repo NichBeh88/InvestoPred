@@ -112,7 +112,23 @@ df_losers.columns = ["Symbol", "Company", "Price", "% Change", "Change ($)"]
 st.subheader("📉Top 10 Losers")
 st.dataframe(df_losers, use_container_width=True)
 
+# --- Personal Watchlist (Authenticated Users Only) ---
+if st.session_state["authenticated"]:
+    st.title("👤 Your Watchlist")
+    user_email = st.session_state["user"]["email"]
 
+    try:
+        watchlists_ref = db.collection("users").document(user_email).collection("watchlists")
+        docs = watchlists_ref.stream()
+        for doc in docs:
+            st.subheader(f"📌 {doc.id}")
+            tickers = doc.to_dict().get("tickers", [])
+            st.write(", ".join(tickers))
+    except Exception as e:
+        st.error(f"Failed to load your watchlists: {e}")
+else:
+    st.info("🔐 Log in to see your personal watchlist.")
+    
 # Load and cache stock data when user first visits homepage
 if "SP500_data" not in st.session_state:
     st.session_state["SP500_data"] = get_cached_stock_data("sp500")
