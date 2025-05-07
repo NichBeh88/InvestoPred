@@ -11,6 +11,7 @@ import time
 import matplotlib.pyplot as plt
 from navigation import navigation
 from auth import track_session_activity
+from tensorflow.keras.models import load_model
 
 track_session_activity()
 
@@ -81,8 +82,7 @@ if not st.session_state.get("authenticated", False):
 navigation()
 
 # Load LSTM model
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "predict_model.keras")
-model = tf.keras.models.load_model(MODEL_PATH)
+model = load_model("predict_model.keras")
 
 # Prediction logic
 def predict_next_90_days(hist, model):
