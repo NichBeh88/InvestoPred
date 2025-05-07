@@ -247,7 +247,7 @@ for ticker in selected_tickers:
 
         # --- Prediction Button ---
         if st.button(f"Run Prediction for {ticker}"):
-            with st.spinner("Running LSTM prediction..."):
+            with st.spinner("Running prediction..."):
                 future_dates, future_prices = predict_next_90_days(hist, model)
 
             fig2, ax2 = plt.subplots(figsize=(14, 4))
