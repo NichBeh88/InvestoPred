@@ -91,7 +91,7 @@ st.markdown("""
 - 🔔 **Create Custom Watchlists** – Stay updated with your favorite stocks.
 - 📈 **Compare Stocks** – Evaluate performance side-by-side.
 """)
-st.markdown("📬 Create an account for free to access all features!")
+st.markdown("📬 Sign up an account for free to access all features!")
 
 # Displaying Top Gainers and Losers
 st.title("💰 Today's Market Movers")
