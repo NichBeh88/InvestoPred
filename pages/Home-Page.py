@@ -120,38 +120,49 @@ st.subheader("🔥 Most Actively Traded Stocks")
 st.dataframe(df_active, use_container_width=True)
 
 # --- Personal Watchlist (Authenticated Users Only) ---
-if st.session_state["authenticated"]:
+if st.session_state.get("authenticated", False):
     user_email = st.session_state["user"]["email"]
-    watchlists_ref = db.collection("users").document(user_email).collection("watchlists")
-    watchlists = list(watchlists_ref.stream())
+    user_doc = db.collection("users").document(user_email)
+    watchlists_ref = user_doc.collection("watchlists")
 
-    if watchlists:
-        first_watchlist = watchlists[0].to_dict()
-        name = first_watchlist.get("name", "My Watchlist")
-        symbols = first_watchlist.get("symbols", [])
+    # Get all watchlists
+    watchlists = watchlists_ref.stream()
+    watchlist_data = {doc.id: doc.to_dict().get("tickers", []) for doc in watchlists}
+    
+    if watchlist_data:
+        # Pick the first watchlist
+        first_watchlist_name = list(watchlist_data.keys())[0]
+        tickers = watchlist_data[first_watchlist_name]
 
-        st.subheader(f"👤 Your Watchlist: {name}")
-        st.caption("Showing only your first saved watchlist.")
+        st.subheader(f"📌 Watchlist: {first_watchlist_name}")
 
-        if symbols:
-            try:
-                data = get_quote_data(symbols)
-                df_watchlist = pd.DataFrame(data)
-                df_watchlist = df_watchlist[["symbol", "price", "change", "changesPercentage"]]
-                df_watchlist.columns = ["Symbol", "Price", "Change ($)", "% Change"]
-                st.dataframe(df_watchlist, use_container_width=True)
-            except Exception as e:
-                st.error(f"Failed to load watchlist data: {e}")
+        if tickers:
+            for ticker in tickers:
+                try:
+                    stock = yf.Ticker(ticker)
+                    hist = stock.history(period="2d")
+                    if hist.empty or len(hist) < 2:
+                        continue
+                    today_price = hist["Close"].iloc[-1]
+                    yesterday_price = hist["Close"].iloc[-2]
+                    change_pct = ((today_price - yesterday_price) / yesterday_price) * 100
+
+                    col1, col2, col3 = st.columns([2, 1, 1])
+                    with col1:
+                        st.markdown(f"**{ticker}**")
+                    with col2:
+                        st.markdown(f"Price: ${today_price:.2f}")
+                    with col3:
+                        change_color = "green" if change_pct >= 0 else "red"
+                        st.markdown(f"<span style='color:{change_color}'>Change: {change_pct:.2f}%</span>", unsafe_allow_html=True)
+                except Exception as e:
+                    st.warning(f"⚠️ Error loading {ticker}: {e}")
         else:
-            st.info("Your watchlist is empty. Add stocks to it in the Watchlist page.")
-            if st.button("Click here to Watchlist page"):
-                st.switch_page("pages/Watchlist.py")
+            st.info("This watchlist is empty.")
     else:
-        st.info("You don't have any watchlists yet. Create one in the Watchlist page.")
-        if st.button("Click here to Watchlist page"):
-            st.switch_page("pages/Watchlist.py")
+        st.info("You have no watchlists yet. Create one from the Watchlist page.")
 else:
-    st.info("🔐 Log in to access your personal watchlist.")
+    st.info("Please log in to view your watchlist.")
     
 # Load and cache stock data when user first visits homepage
 if "SP500_data" not in st.session_state:
