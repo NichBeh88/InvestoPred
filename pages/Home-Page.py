@@ -121,20 +121,33 @@ st.dataframe(df_active, use_container_width=True)
 
 # --- Personal Watchlist (Authenticated Users Only) ---
 if st.session_state["authenticated"]:
-    st.title("👤 Your Watchlist")
     user_email = st.session_state["user"]["email"]
+    watchlists_ref = db.collection("users").document(user_email).collection("watchlists")
+    watchlists = list(watchlists_ref.stream())
 
-    try:
-        watchlists_ref = db.collection("users").document(user_email).collection("watchlists")
-        docs = watchlists_ref.stream()
-        for doc in docs:
-            st.subheader(f"📌 {doc.id}")
-            tickers = doc.to_dict().get("tickers", [])
-            st.write(", ".join(tickers))
-    except Exception as e:
-        st.error(f"Failed to load your watchlists: {e}")
+    if watchlists:
+        first_watchlist = watchlists[0].to_dict()
+        name = first_watchlist.get("name", "My Watchlist")
+        symbols = first_watchlist.get("symbols", [])
+
+        st.subheader(f"👤 Your Watchlist: {name}")
+        st.caption("Showing only your first saved watchlist. [View all →](watchlist.py)")
+
+        if symbols:
+            try:
+                data = get_quote_data(symbols)
+                df_watchlist = pd.DataFrame(data)
+                df_watchlist = df_watchlist[["symbol", "price", "change", "changesPercentage"]]
+                df_watchlist.columns = ["Symbol", "Price", "Change ($)", "% Change"]
+                st.dataframe(df_watchlist, use_container_width=True)
+            except Exception as e:
+                st.error(f"Failed to load watchlist data: {e}")
+        else:
+            st.info("Your watchlist is empty. Add stocks to it in the Watchlist page.")
+    else:
+        st.info("You don't have any watchlists yet. Create one in the Watchlist page.")
 else:
-    st.info("🔐 Log in to see your personal watchlist.")
+    st.info("🔐 Log in to access your personal watchlist.")
     
 # Load and cache stock data when user first visits homepage
 if "SP500_data" not in st.session_state:
