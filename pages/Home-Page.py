@@ -84,7 +84,6 @@ st.markdown("""
 ### 🚀 *Predict. Analyze. Succeed.*
 Welcome to **InvestoPred** – your all-in-one platform for stock market prediction, analysis, and insights.  
 """)
-st.write('Please browse through the pages and try the functions!')
 st.markdown("### 🔍 What You Can Do Here:")
 st.markdown("""
 - 📊 **Visualize Stock Trends** – Interactive charts and indicators.
@@ -92,6 +91,7 @@ st.markdown("""
 - 🔔 **Create Custom Watchlists** – Stay updated with your favorite stocks.
 - 📈 **Compare Stocks** – Evaluate performance side-by-side.
 """)
+st.markdown("📬 Create an account for free to access all features!")
 
 # Displaying Top Gainers and Losers
 st.title("💰 Today's Market Movers")
