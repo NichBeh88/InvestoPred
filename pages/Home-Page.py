@@ -89,13 +89,12 @@ st.markdown("### 🔍 What You Can Do Here:")
 st.markdown("""
 - 📊 **Visualize Stock Trends** – Interactive charts and indicators.
 - 🤖 **Predict Future Prices** – AI-powered stock predictions.
-- 📰 **Analyze Market Sentiment** – News and insider trading.
 - 🔔 **Create Custom Watchlists** – Stay updated with your favorite stocks.
 - 📈 **Compare Stocks** – Evaluate performance side-by-side.
 """)
 
 # Displaying Top Gainers and Losers
-st.title("📈 Market Movers")
+st.title("💰 Market Movers")
 
 # Fetch top gainers and losers (this will use cached data if available)
 gainers = get_top_gainers()
@@ -104,13 +103,13 @@ losers = get_top_losers()
 # Display top 10 gainers
 df_gainers = pd.DataFrame(gainers)[["symbol", "name", "price", "changesPercentage", "change"]].head(10)
 df_gainers.columns = ["Symbol", "Company", "Price", "% Change", "Change ($)"]
-st.subheader("Top 10 Gainers")
+st.subheader("📈Top 10 Gainers")
 st.dataframe(df_gainers, use_container_width=True)
 
 # Display top 10 losers
 df_losers = pd.DataFrame(losers)[["symbol", "name", "price", "changesPercentage", "change"]].head(10)
 df_losers.columns = ["Symbol", "Company", "Price", "% Change", "Change ($)"]
-st.subheader("Top 10 Losers")
+st.subheader("📉Top 10 Losers")
 st.dataframe(df_losers, use_container_width=True)
 
 
