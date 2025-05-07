@@ -11,7 +11,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 from auth import track_session_activity
 import pandas as pd
-from utils import get_top_gainers, get_top_losers, get_cached_stock_data, get_top_traded
+from utils import get_top_gainers, get_top_losers, get_cached_stock_data
 
 track_session_activity()
 
