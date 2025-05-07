@@ -82,7 +82,7 @@ if not st.session_state.get("authenticated", False):
 navigation()
 
 # Load LSTM model
-model = load_model("predict_model.keras")
+model = load_model('predict_model.keras')
 
 # Prediction logic
 def predict_next_90_days(hist, model):
