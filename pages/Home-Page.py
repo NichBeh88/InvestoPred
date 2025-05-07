@@ -93,10 +93,6 @@ st.markdown("""
 """)
 st.markdown("📬 Sign up an account for free to access all features!")
 
-ticker = st.text_input("🔎 Search a stock by ticker from S&P500 and FTSE100 (e.g., AAPL, BP.L):")
-if ticker:
-    st.switch_page("pages/Stock-Chart&Data.py") 
-
 # Displaying Top Gainers and Losers
 st.title("💰 Today's Market Movers")
 
