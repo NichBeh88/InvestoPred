@@ -111,3 +111,7 @@ def get_top_gainers():
 
 def get_top_losers():
     return fetch_and_cache_fmp_data("losers")
+
+def get_most_actives():
+    return fetch_and_cache_fmp_data("actives")
+
