@@ -94,7 +94,7 @@ st.markdown("""
 """)
 
 # Displaying Top Gainers and Losers
-st.title("💰 Market Movers")
+st.title("💰 Today's Market Movers")
 
 # Fetch top gainers and losers (this will use cached data if available)
 gainers = get_top_gainers()
