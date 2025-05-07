@@ -99,7 +99,6 @@ st.title("💰 Today's Market Movers")
 # Fetch top gainers and losers (this will use cached data if available)
 gainers = get_top_gainers()
 losers = get_top_losers()
-active = get_top_traded()
 
 # Display top 10 gainers
 df_gainers = pd.DataFrame(gainers)[["symbol", "name", "price", "changesPercentage", "change"]].head(10)
@@ -112,12 +111,6 @@ df_losers = pd.DataFrame(losers)[["symbol", "name", "price", "changesPercentage"
 df_losers.columns = ["Symbol", "Company", "Price", "% Change", "Change ($)"]
 st.subheader("📉Top 10 Losers")
 st.dataframe(df_losers, use_container_width=True)
-
-# Display top 10 most active
-df_active = pd.DataFrame(active)[["symbol", "name", "price", "changesPercentage", "change"]].head(10)
-df_active.columns = ["Symbol", "Company", "Price", "% Change", "Change ($)"]
-st.subheader("🔝🔥Top 10 Most Traded")
-st.dataframe(df_active, use_container_width=True)
 
 
 # Load and cache stock data when user first visits homepage
