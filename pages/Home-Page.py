@@ -121,8 +121,8 @@ st.subheader("🔥 Most Actively Traded Stocks")
 st.dataframe(df_active, use_container_width=True)
 
 # Display earnings of the day
-df_earnings = pd.DataFrame(earnings)[["symbol", "date", "eps", "revenue"]].head(10)
-df_earnings.columns = ["Symbol", "Date", "EPS Estimate", "Revenue Estimate"]
+df_earnings = pd.DataFrame(earnings)[["symbol", "date", "epsActual", "epsEstimated", "revenueActual", "revenueEstimated"]].head(10)
+df_earnings.columns = ["Symbol", "Date", "EPS Actual", "EPS Estimate", "Revenue Actual", "Revenue Estimate"]
 st.subheader("📄 Earnings releasing today")
 st.dataframe(df_earnings, use_container_width=True)
 
