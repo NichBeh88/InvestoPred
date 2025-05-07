@@ -144,10 +144,12 @@ if st.session_state["authenticated"]:
                 st.error(f"Failed to load watchlist data: {e}")
         else:
             st.info("Your watchlist is empty. Add stocks to it in the Watchlist page.")
+            if st.button("Click here to Watchlist page"):
+                st.switch_page("pages/Watchlist.py")
     else:
         st.info("You don't have any watchlists yet. Create one in the Watchlist page.")
         if st.button("Click here to Watchlist page"):
-            st.switch_page(pages/"Watchlist.py")
+            st.switch_page("pages/Watchlist.py")
 else:
     st.info("🔐 Log in to access your personal watchlist.")
     
