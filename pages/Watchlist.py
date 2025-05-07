@@ -221,6 +221,7 @@ for ticker in selected_tickers:
         st.markdown(f"**Sector:** {sector}")
         st.markdown(f"**52-Week High:** ${high_52w:,.2f}" if high_52w else "**52-Week High:** N/A")
         st.markdown(f"**52-Week Low:** ${low_52w:,.2f}" if low_52w else "**52-Week Low:** N/A")
+        st.markdown(f"**Price:** ${current_price:,.2f}")
 
         if price_change is not None:
             st.markdown(
