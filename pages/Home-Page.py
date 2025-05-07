@@ -114,9 +114,9 @@ st.subheader("📉Top 10 Losers")
 st.dataframe(df_losers, use_container_width=True)
 
 # --- Heatlist: Top Turnover Stocks ---
-st.title("🔥 Most Actively Traded Stocks")
-df_active = pd.DataFrame(actives)[["symbol", "name", "price", "changesPercentage"]].head(10)
-df_active.columns = ["Symbol", "Company", "Price", "% Change"]
+df_active = pd.DataFrame(actives)[["symbol", "name", "price", "changesPercentage", "change"]].head(10)
+df_active.columns = ["Symbol", "Company", "Price", "% Change", "Change ($)"]
+st.subheader("🔥 Most Actively Traded Stocks")
 st.dataframe(df_active, use_container_width=True)
 
 # --- Personal Watchlist (Authenticated Users Only) ---
