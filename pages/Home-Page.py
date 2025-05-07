@@ -100,6 +100,7 @@ st.title("💰 Today's Market Movers")
 gainers = get_top_gainers()
 losers = get_top_losers()
 actives = get_most_actives()
+earnings = get_earnings()
 
 # Display top 10 gainers
 df_gainers = pd.DataFrame(gainers)[["symbol", "name", "price", "changesPercentage", "change"]].head(10)
