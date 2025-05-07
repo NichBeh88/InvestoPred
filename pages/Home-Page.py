@@ -80,10 +80,19 @@ if st.session_state.get("logout_triggered", False):
     st.session_state["logout_triggered"] = False  # Reset trigger
     st.switch_page("pages/Home-Page.py")  # Redirect immediately
 
-st.title('Welcome to InvestoPred!')
-
+st.markdown("""
+### 🚀 *Predict. Analyze. Succeed.*
+Welcome to **InvestoPred** – your all-in-one platform for stock market prediction, analysis, and insights.  
+""")
 st.write('Please browse through the pages and try the functions!')
-
+st.markdown("### 🔍 What You Can Do Here:")
+st.markdown("""
+- 📊 **Visualize Stock Trends** – Interactive charts and indicators.
+- 🤖 **Predict Future Prices** – AI-powered stock predictions.
+- 📰 **Analyze Market Sentiment** – News and insider trading.
+- 🔔 **Create Custom Watchlists** – Stay updated with your favorite stocks.
+- 📈 **Compare Stocks** – Evaluate performance side-by-side.
+""")
 
 # Displaying Top Gainers and Losers
 st.title("📈 Market Movers")
