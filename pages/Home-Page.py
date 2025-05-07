@@ -11,7 +11,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 from auth import track_session_activity
 import pandas as pd
-from utils import get_top_gainers, get_top_losers, get_cached_stock_data, get_most_actives, get_earnings
+from utils import get_top_gainers, get_top_losers, get_cached_stock_data, get_most_actives
 
 track_session_activity()
 
@@ -100,7 +100,6 @@ st.title("💰 Today's Market Movers")
 gainers = get_top_gainers()
 losers = get_top_losers()
 actives = get_most_actives()
-earnings = get_earnings()
 
 # Display top 10 gainers
 df_gainers = pd.DataFrame(gainers)[["symbol", "name", "price", "changesPercentage", "change"]].head(10)
@@ -119,12 +118,6 @@ df_active = pd.DataFrame(actives)[["symbol", "name", "price", "changesPercentage
 df_active.columns = ["Symbol", "Company", "Price", "% Change", "Change ($)"]
 st.subheader("🔥 Most Actively Traded Stocks")
 st.dataframe(df_active, use_container_width=True)
-
-# Display earnings of the day
-df_earnings = pd.DataFrame(earnings)[["symbol", "date", "epsActual", "epsEstimated", "revenueActual", "revenueEstimated"]].head(10)
-df_earnings.columns = ["Symbol", "Date", "EPS Actual", "EPS Estimate", "Revenue Actual", "Revenue Estimate"]
-st.subheader("📄 Earnings releasing today")
-st.dataframe(df_earnings, use_container_width=True)
 
 # --- Personal Watchlist (Authenticated Users Only) ---
 if st.session_state["authenticated"]:
