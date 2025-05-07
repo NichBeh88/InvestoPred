@@ -115,27 +115,9 @@ st.dataframe(df_losers, use_container_width=True)
 
 # --- Heatlist: Top Turnover Stocks ---
 st.title("🔥 Most Actively Traded Stocks")
-df_turnover = pd.DataFrame(turnover_data)[["symbol", "name", "price", "changesPercentage", "volume"]].head(10)
-df_turnover.columns = ["Symbol", "Company", "Price", "% Change", "Volume"]
-st.dataframe(df_turnover, use_container_width=True)
-
-# --- Earnings Calendar ---
-st.title("📅 Earnings Calendar")
-def fetch_earnings_today():
-    url = f"https://financialmodelingprep.com/api/v3/earning_calendar?from=2025-05-07&to=2025-05-07&apikey={FMP_API_KEY}"
-    response = requests.get(url)
-    if response.ok:
-        return response.json()
-    else:
-        return []
-
-earnings = fetch_earnings_today()
-if earnings:
-    df_earnings = pd.DataFrame(earnings)[["symbol", "date", "eps", "revenue"]].head(10)
-    df_earnings.columns = ["Symbol", "Date", "EPS Estimate", "Revenue Estimate"]
-    st.dataframe(df_earnings, use_container_width=True)
-else:
-    st.info("No earnings releases scheduled for today.")
+df_active = pd.DataFrame(actives)[["symbol", "name", "price", "changesPercentage", "volume"]].head(10)
+df_active.columns = ["Symbol", "Company", "Price", "% Change", "Volume"]
+st.dataframe(df_active, use_container_width=True)
 
 # --- Personal Watchlist (Authenticated Users Only) ---
 if st.session_state["authenticated"]:
