@@ -114,7 +114,7 @@ st.subheader("📉Top 10 Losers")
 st.dataframe(df_losers, use_container_width=True)
 
 # Display top 10 most active
-df_active = pd.DataFrame(losers)[["symbol", "name", "price", "changesPercentage", "change"]].head(10)
+df_active = pd.DataFrame(active)[["symbol", "name", "price", "changesPercentage", "change"]].head(10)
 df_active.columns = ["Symbol", "Company", "Price", "% Change", "Change ($)"]
 st.subheader("🔝🔥Top 10 Most Traded")
 st.dataframe(df_active, use_container_width=True)
