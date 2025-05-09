@@ -83,7 +83,7 @@ if not st.session_state.get("authenticated", False):
 navigation()
 
 st.title("📊 Stock Comparisons & Predictions")
-st.caption("**What can you do here?**", help="Select the stock index(es) that you want to compare from the Navigation Bar beside. Then, click the dropout column to select or type in your interested stock(s) symbol and click *Compare & Predict Stocks*.")
+st.caption("**What can you do here?** ℹ️", help="Select the stock index(es) that you want to compare from the Navigation Bar beside. Then, click the dropout column to select or type in your interested stock(s) symbol and click *Compare & Predict Stocks*.")
 
 # Load stock symbols based on index
 @st.cache_data
