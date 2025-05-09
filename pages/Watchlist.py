@@ -169,7 +169,7 @@ if selected_watchlist:
 
 # Add stock to watchlist
 st.subheader(f"📈 Watchlist: {selected_watchlist}")
-st.caption("**Guide** ℹ️", help="Click")
+st.caption("**Guide** ℹ️", help="Expand the dropout columns below to Add stocks into or Remove stocks from watchlists selected.")
 with st.expander("➕ Add stock to this watchlist"):
     new_ticker = st.selectbox("Select a ticker to add", [t for t in all_tickers if t not in selected_tickers])
     if st.button("Add to Watchlist"):
