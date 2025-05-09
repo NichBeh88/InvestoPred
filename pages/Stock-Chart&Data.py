@@ -68,9 +68,6 @@ hide_streamlit_style = """
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-# Streamlit UI
-st.title("📊 Stock Selection & Prediction with Candlestick Chart & Indicators")
-
 # Load stock symbols for S&P 500 and FTSE 100
 @st.cache_data
 def load_stock_symbols(index="sp500"):
@@ -83,6 +80,8 @@ def load_stock_symbols(index="sp500"):
     return df["Symbol"].tolist()
 
 navigation()
+
+st.title("📊 Stock Selection & Prediction with Candlestick Chart & Indicators")
 
 # Redirect to Home Page if logout was triggered
 if st.session_state.get("logout_triggered", False):
