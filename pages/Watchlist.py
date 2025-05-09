@@ -119,7 +119,7 @@ user_doc = db.collection("users").document(user_email)
 watchlists_ref = user_doc.collection("watchlists")
 
 st.title("📊 Your Watchlists")
-st.caption("**What can you do here?**", help="A default watchlist will be created for you. Navigate to the side Navigation Bar to Select which watchlist to show, Create a new watchlist, Rename and Delete watchlists!")
+st.caption("**What can you do here?** ℹ️", help="A default watchlist will be created for you. Navigate to the side Navigation Bar to Select which watchlist to show, Create a new watchlist, Rename and Delete watchlists!")
 
 # Sidebar actions
 st.sidebar.header("🛠 Watchlist Actions")
@@ -169,7 +169,7 @@ if selected_watchlist:
 
 # Add stock to watchlist
 st.subheader(f"📈 Watchlist: {selected_watchlist}")
-st.caption("**Guide 
+st.caption("**Guide** ℹ️", help="Click")
 with st.expander("➕ Add stock to this watchlist"):
     new_ticker = st.selectbox("Select a ticker to add", [t for t in all_tickers if t not in selected_tickers])
     if st.button("Add to Watchlist"):
