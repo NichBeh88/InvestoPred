@@ -60,6 +60,6 @@ with tab3:
 st.markdown("""
 <hr style="margin-top: 2em;">
 <small>
-📜 **Disclaimer:** This app is for informational purposes only and does not constitute financial advice. Always do your own research or consult a professional.
+📜 **Disclaimer:** This app is for informational purposes only and does not constitute financial advice. Always do your own research or consult a professional. Users' privacy are our top priority and all passwords are encrypted in database.
 </small>
 """, unsafe_allow_html=True)
