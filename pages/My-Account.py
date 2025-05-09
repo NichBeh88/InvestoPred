@@ -204,3 +204,10 @@ confirm_new_password = st.text_input("Confirm New Password", type="password")
 if st.button("Update Password"):
     change_password(current_password, new_password, confirm_new_password)
     st.switch_page("pages/loginsignup.py")
+
+st.markdown("""
+<hr style="margin-top: 2em;">
+<small>
+📜 **Disclaimer:** This app is for informational purposes only and does not constitute financial advice. Always do your own research or consult a professional. Users' privacy are our top priority and all passwords are encrypted in database.
+</small>
+""", unsafe_allow_html=True)
