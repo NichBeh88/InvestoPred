@@ -191,7 +191,7 @@ if selected_tickers:
 # Show charts
 for ticker in selected_tickers:
     st.subheader(f"{ticker} Stock Overview")
-    st.caption("**Guide** ℹ️", help="You can predict each stocks that are in the watchlist by clicking the *Run Prediction* button below the chart.")
+    st.caption("**Guide** ℹ️", help="You can get predictions by our model for each stocks that are in the watchlist by clicking the *Run Prediction* button below the chart.")
     try:
         stock = yf.Ticker(ticker)
         hist = stock.history(period="1y")
