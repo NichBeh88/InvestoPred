@@ -169,3 +169,10 @@ fig.update_layout(
 )
 
 st.plotly_chart(fig)
+
+st.markdown("""
+<hr style="margin-top: 2em;">
+<small>
+📜 **Disclaimer:** This app is for informational purposes only and does not constitute financial advice. Always do your own research or consult a professional.
+</small>
+""", unsafe_allow_html=True)
