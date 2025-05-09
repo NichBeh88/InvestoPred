@@ -121,7 +121,7 @@ if sector != "All":
     filtered_stocks = filtered_stocks[filtered_stocks["Sector"] == sector]
 
 st.subheader("📊 Filtered Stocks")
-st.markdown("**Keywords** ℹ️", help="EPS: Earnings Per Share, calulated by dividing a company's net income by total number of outstanding shares. PEratio: Price-To-Earnings Ratio, calculated by dividing company's share price to earnings per share (for FTSE100 stocks, EPS needs to x100 before dividing as price for each company's shares are calculated by lots and 1 lot size = 100 units.")
+st.caption("**Keywords** ℹ️", help="EPS: Earnings Per Share, calulated by dividing a company's net income by total number of outstanding shares. PEratio: Price-To-Earnings Ratio, calculated by dividing company's share price to earnings per share (for FTSE100 stocks, EPS needs to x100 before dividing as price for each company's shares are calculated by lots and 1 lot size = 100 units.")
 st.dataframe(filtered_stocks)
 st.write(f"Total Stocks Matched: **{len(filtered_stocks)}**")
 
