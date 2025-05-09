@@ -52,6 +52,7 @@ def load_stock_symbols():
 def get_cached_stock_data(index_name):
     """
     index_name should be either 'sp500' or 'ftse100'
+    Returns a DataFrame with reordered columns: Company Name, Symbol, etc.
     """
     try:
         doc_ref = db.collection("stock_cache").document(index_name)
@@ -59,7 +60,16 @@ def get_cached_stock_data(index_name):
         if doc.exists:
             data = doc.to_dict()
             if "stocks" in data:
-                return pd.DataFrame(data["stocks"])
+                df = pd.DataFrame(data["stocks"])
+
+                # 🔸 Desired column order
+                preferred_order = ['CompanyName', 'Symbol', 'Price', 'PEratio', 'EPS', 'DividendYield', 'Market Cap', 'Sector', 'Industry']
+
+                # 🔸 Reorder columns if present, keep any extra columns at the end
+                ordered_cols = [col for col in preferred_order if col in df.columns]
+                df = df[ordered_cols]
+
+                return df
             else:
                 st.warning(f"⚠️ No 'stocks' field found in Firestore document {index_name}.")
                 return pd.DataFrame()
@@ -69,7 +79,6 @@ def get_cached_stock_data(index_name):
     except Exception as e:
         st.error(f"❌ Error fetching stock data from Firestore document {index_name}: {e}")
         return pd.DataFrame()
-
 
 # Top gainers and losers cache
 
