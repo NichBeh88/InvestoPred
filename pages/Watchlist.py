@@ -262,3 +262,11 @@ for ticker in selected_tickers:
 
     except Exception as e:
         st.error(f"❌ Error with {ticker}: {e}")
+
+
+st.markdown("""
+<hr style="margin-top: 2em;">
+<small>
+📜 **Disclaimer:** This app is for informational purposes only and does not constitute financial advice. Always do your own research or consult a professional.
+</small>
+""", unsafe_allow_html=True)
