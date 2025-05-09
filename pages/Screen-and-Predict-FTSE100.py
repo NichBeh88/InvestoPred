@@ -121,6 +121,7 @@ if sector != "All":
     filtered_stocks = filtered_stocks[filtered_stocks["Sector"] == sector]
 
 st.subheader("📊 Filtered Stocks")
+st.markdown("**Tips** ℹ️", help="Price-to-Earnings ratio: valuation metric comparing share price to earnings per share.")
 st.dataframe(filtered_stocks)
 st.write(f"Total Stocks Matched: **{len(filtered_stocks)}**")
 
