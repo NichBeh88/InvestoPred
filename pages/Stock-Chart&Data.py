@@ -168,7 +168,7 @@ fig.update_layout(
     xaxis_rangeslider_visible=False
 )
 
-st.caption(**How to use?**, help="Slide your mouse cursor to the chart. Navigate to the top right and try out those functions!") 
+st.caption("**How to use?**", help="Slide your mouse cursor to the chart. Navigate to the top right and try out those functions!") 
 st.plotly_chart(fig)
 
 st.markdown("""
