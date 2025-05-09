@@ -128,7 +128,7 @@ st.write(f"Total Stocks Matched: **{len(filtered_stocks)}**")
 
 # Stock Prediction Section
 st.subheader("📊 Stock Price Prediction")
-st.caption("**Guide** ℹ️", help="Filter stocks in the Navigation Bar and choose the stock that you want to predict from the dropout column. Then, just wait for the model to do the rest and see the prediction outcome!")
+st.caption("**Guide** ℹ️", help="You may filter stocks in the Navigation Bar and choose the stock that you want to predict from the dropout column. Then, just wait for the model to do the rest and see the prediction outcome!")
 selected_stock = st.selectbox("Select a stock for prediction:", filtered_stocks["Symbol"].tolist())
 
 if st.button("Predict Price"):
