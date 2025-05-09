@@ -120,12 +120,12 @@ if not np.isnan(eps_min):
 if sector != "All":
     filtered_stocks = filtered_stocks[filtered_stocks["Sector"] == sector]
 
-st.subheader("📈 Filtered Stocks")
+st.subheader("📊 Filtered Stocks")
 st.dataframe(filtered_stocks)
 st.write(f"Total Stocks Matched: **{len(filtered_stocks)}**")
 
 # Stock Prediction Section
-st.subheader("📉 Stock Price Prediction")
+st.subheader("📊 Stock Price Prediction")
 selected_stock = st.selectbox("Select a stock for prediction:", filtered_stocks["Symbol"].tolist())
 
 if st.button("Predict Price"):
