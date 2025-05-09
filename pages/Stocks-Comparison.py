@@ -237,3 +237,10 @@ if st.button("Compare & Predict Stocks"):
             status.update(label="❌ Failed to fetch data", state="error", expanded=True)
     
     status.update(label="✅ Done!", state="complete", expanded=True)
+
+st.markdown("""
+<hr style="margin-top: 2em;">
+<small>
+📜 **Disclaimer:** This app is for informational purposes only and does not constitute financial advice. Always do your own research or consult a professional.
+</small>
+""", unsafe_allow_html=True)
