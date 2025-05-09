@@ -222,7 +222,7 @@ if st.button("Compare & Predict Stocks"):
                 st.pyplot(fig1)
     
             with col2:
-                st.subheader(f"📉 {stock2} Prediction (Next 90 Days)")
+                st.subheader(f"📈 {stock2} Prediction (Next 90 Days)")
                 fig2, ax2 = plt.subplots(figsize=(6, 4))
                 ax2.plot(future_dates, future_predictions2, color='red', label=f"{stock2} Prediction")
                 ax2.set_xlabel("Date")
