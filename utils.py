@@ -63,7 +63,7 @@ def get_cached_stock_data(index_name):
                 df = pd.DataFrame(data["stocks"])
 
                 # 🔸 Desired column order
-                preferred_order = ['CompanyName', 'Symbol', 'Price', 'PEratio', 'EPS', 'DividendYield', 'Market Cap', 'Sector', 'Industry']
+                preferred_order = ['CompanyName', 'Symbol', 'Price', 'PEratio', 'EPS', 'DividendYield', 'Market Cap', 'Sector']
 
                 # 🔸 Reorder columns if present, keep any extra columns at the end
                 ordered_cols = [col for col in preferred_order if col in df.columns]
