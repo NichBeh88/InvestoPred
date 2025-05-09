@@ -171,3 +171,10 @@ if st.button("Predict Price"):
         st.download_button(label="Download CSV", data=forecast_df.to_csv(index=False), file_name=f"{selected_stock}_forecast.csv", mime='text/csv')
 
         status.update(label="✅ Done!", state="complete", expanded=True)
+
+st.markdown("""
+<hr style="margin-top: 2em;">
+<small>
+📜 **Disclaimer:** This app is for informational purposes only and does not constitute financial advice. Always do your own research or consult a professional.
+</small>
+""", unsafe_allow_html=True)
