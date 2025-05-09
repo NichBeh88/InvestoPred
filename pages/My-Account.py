@@ -194,6 +194,8 @@ email = st.session_state["user"]["email"]
 st.write(f"**Email:** {email}")
 st.write("**Password:** 🔒 ********")  # Blurred password for security
 
+st.caption("**Take Note** ❗️", help="Fill in correct Current Password, DO NOT fill in the SAME New Password as Current Password and Fill in correct new password in *Confirm New Password*. Click the *Update Password* when done.")  
+
 st.subheader("Change Password")
 current_password = st.text_input("Current Password", type="password")
 new_password = st.text_input("New Password", type="password")
