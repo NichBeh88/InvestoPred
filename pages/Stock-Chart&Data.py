@@ -124,10 +124,10 @@ if stock_data is None:
 # Display stock data
 st.subheader(f"📈 {stock_data['Company Name']} ({selected_stock})")
 st.write(f"**Sector**: {stock_data['Sector']}")
-st.write(f"**P/E Ratio**: {stock_data['P/E Ratio']}")
+st.write(f"**Price-to-Earnings Ratio**: {stock_data['P/E Ratio']}")
 st.write(f"**Dividend Yield**: {stock_data['Dividend Yield (%)']}%")
 st.write(f"**Market Cap**: {stock_data['Market Cap']}")
-st.write(f"**EPS**: {stock_data['EPS']}")
+st.write(f"**Earnings Per Share**: {stock_data['EPS']}")
 st.write(f"**Price**: {stock_data['Price']}")
 
 # Prepare stock price chart
