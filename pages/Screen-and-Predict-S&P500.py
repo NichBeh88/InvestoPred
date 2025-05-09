@@ -122,7 +122,7 @@ if sector != "All":
     filtered_stocks = filtered_stocks[filtered_stocks["Sector"] == sector]
 
 st.subheader("📊 Filtered Stocks")
-st.caption("**Keyterms** ℹ️", help="EPS: Earnings Per Share, calulated by dividing a company's net income by total number of outstanding shares. PEratio: Price-To-Earnings Ratio, calculated by dividing company's share price to earnings per share.
+st.caption("**Keyterms** ℹ️", help="EPS: Earnings Per Share, calulated by dividing a company's net income by total number of outstanding shares. PEratio: Price-To-Earnings Ratio, calculated by dividing company's share price to earnings per share.")
 st.dataframe(filtered_stocks)
 st.write(f"Total Stocks Matched: **{len(filtered_stocks)}**")
 
