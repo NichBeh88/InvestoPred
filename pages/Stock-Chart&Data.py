@@ -82,7 +82,7 @@ def load_stock_symbols(index="sp500"):
 navigation()
 
 st.title("📊 Stock Selection & Prediction with Candlestick Chart & Indicators")
-st.caption("**What you can do here?**, help="Select which stock index that your interested stock(s) is in. Then, click the dropout column or type the stock symbol that you are interested in and press *enter* on your keyboard.")
+st.caption("**What you can do here?**", help="Select which stock index that your interested stock(s) is in. Then, click the dropout column or type the stock symbol that you are interested in and press *enter* on your keyboard.")
 
 # Redirect to Home Page if logout was triggered
 if st.session_state.get("logout_triggered", False):
