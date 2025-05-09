@@ -93,6 +93,7 @@ financial_df = get_cached_stock_data("sp500")
 
 # Streamlit UI Setup
 st.title("🇺🇸 S&P 500 Stock Screener & Prediction")
+st.caption("**What can you do here?** ℹ️", help="Try out the filter functions in side Navigation Bar to filter out the stock(s) that fits your criteria(s) the most! Then, scroll down and try out our model to predict the potential next 90 days trend of the stock(s) filtered!")
 
 # Sidebar Filters for stock selection
 st.sidebar.header("🔍 Filter Stocks")
