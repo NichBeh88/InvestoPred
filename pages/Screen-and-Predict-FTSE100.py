@@ -101,24 +101,24 @@ pe_min = st.sidebar.number_input("Min P/E", value=np.nan)
 pe_max = st.sidebar.number_input("Max P/E", value=np.nan)
 dy_min = st.sidebar.number_input("Min Dividend Yield (%)", value=np.nan)
 eps_min = st.sidebar.number_input("Min EPS (£)", value=np.nan)
-sector = st.sidebar.selectbox("Sector", ["All"] + list(financial_df["sector"].dropna().unique()))
+sector = st.sidebar.selectbox("Sector", ["All"] + list(financial_df["Sector"].dropna().unique()))
 
 # Apply Filters
 filtered_stocks = financial_df.copy()
 if not np.isnan(price_min):
-    filtered_stocks = filtered_stocks[filtered_stocks["price"] >= price_min]
+    filtered_stocks = filtered_stocks[filtered_stocks["Price"] >= price_min]
 if not np.isnan(price_max):
-    filtered_stocks = filtered_stocks[filtered_stocks["price"] <= price_max]
+    filtered_stocks = filtered_stocks[filtered_stocks["Price"] <= price_max]
 if not np.isnan(pe_min):
-    filtered_stocks = filtered_stocks[filtered_stocks["peRatio"] >= pe_min]
+    filtered_stocks = filtered_stocks[filtered_stocks["PEratio"] >= pe_min]
 if not np.isnan(pe_max):
-    filtered_stocks = filtered_stocks[filtered_stocks["peRatio"] <= pe_max]
+    filtered_stocks = filtered_stocks[filtered_stocks["PEratio"] <= pe_max]
 if not np.isnan(dy_min):
-    filtered_stocks = filtered_stocks[filtered_stocks["dividendYield"] >= dy_min]
+    filtered_stocks = filtered_stocks[filtered_stocks["DividendYield"] >= dy_min]
 if not np.isnan(eps_min):
-    filtered_stocks = filtered_stocks[filtered_stocks["eps"] >= eps_min]
+    filtered_stocks = filtered_stocks[filtered_stocks["EPS"] >= eps_min]
 if sector != "All":
-    filtered_stocks = filtered_stocks[filtered_stocks["sector"] == sector]
+    filtered_stocks = filtered_stocks[filtered_stocks["Sector"] == sector]
 
 st.subheader("📈 Filtered Stocks")
 st.dataframe(filtered_stocks)
@@ -126,7 +126,7 @@ st.write(f"Total Stocks Matched: **{len(filtered_stocks)}**")
 
 # Stock Prediction Section
 st.subheader("📉 Stock Price Prediction")
-selected_stock = st.selectbox("Select a stock for prediction:", filtered_stocks["symbol"].tolist())
+selected_stock = st.selectbox("Select a stock for prediction:", filtered_stocks["Symbol"].tolist())
 
 if st.button("Predict Price"):
     with st.status(f"{selected_stock}, Alohomora!!", expanded=False) as status:
