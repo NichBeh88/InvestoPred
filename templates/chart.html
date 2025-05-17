@@ -3,37 +3,82 @@
 {% block title %}Stock Chart{% endblock %}
 
 {% block content %}
-  <h3>📊 Live Stock Chart from TradingView</h3>
+<div class="container mt-4">
+  <div class="card shadow-sm border-0">
+    <div class="card-body">
+      <h3 class="card-title mb-4">📊 Stock Price Chart</h3>
+      <form method="post" class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label for="index" class="form-label">Choose Index</label>
+          <select id="index" name="index" class="form-select" onchange="updateStockList()" required>
+            <option value="sp500" {% if selected_index == 'sp500' %}selected{% endif %}>S&P 500</option>
+            <option value="ftse100" {% if selected_index == 'ftse100' %}selected{% endif %}>FTSE 100</option>
+          </select>
+        </div>
 
-  <form method="post">
-    <div class="mb-3">
-      <label for="symbol" class="form-label">Enter Stock Symbol (e.g. AAPL, MSFT, NVDA):</label>
-      <input type="text" class="form-control" id="symbol" name="symbol" placeholder="AAPL" required>
+        <div class="col-md-6">
+          <label for="symbol" class="form-label">Choose Stock</label>
+          <select id="symbol" name="symbol" class="form-select" required>
+            <option disabled selected value="">🔎 Start typing to search...</option>
+            {% for stock in symbol_data[selected_index] %}
+              <option value="{{ stock.Symbol }}" {% if selected_symbol == stock.Symbol %}selected{% endif %} title="{{ stock.Sector }}">
+                {{ stock.Symbol }} - {{ stock.Company }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <button type="submit" class="btn btn-primary w-100">Show Chart</button>
+        </div>
+      </form>
     </div>
-    <button type="submit" class="btn btn-primary">Show Chart</button>
-  </form>
+  </div>
 
-  {% if symbol %}
-    <div class="mt-5 tradingview-widget-container">
-      <div id="tradingview_chart"></div>
-      <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-      <script type="text/javascript">
-        new TradingView.widget({
-          "width": "100%",
-          "height": 600,
-          "symbol": "{{ symbol }}",
-          "interval": "D",
-          "timezone": "Etc/UTC",
-          "theme": "light",
-          "style": "1",
-          "locale": "en",
-          "toolbar_bg": "#f1f3f6",
-          "enable_publishing": false,
-          "hide_side_toolbar": false,
-          "allow_symbol_change": true,
-          "container_id": "tradingview_chart"
-        });
-      </script>
+  {% if full_symbol %}
+    <div class="card mt-4 shadow-sm border-0">
+      <div class="card-body">
+        <h5 class="card-title text-muted mb-3">📈 Chart for: <strong>{{ selected_symbol }}</strong></h5>
+        <div class="tradingview-widget-container">
+          <div id="tradingview_chart"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+          <script type="text/javascript">
+            new TradingView.widget({
+              "width": "100%",
+              "height": 600,
+              "symbol": "{{ full_symbol }}",
+              "interval": "D",
+              "timezone": "Etc/UTC",
+              "theme": "light",
+              "style": "1",
+              "locale": "en",
+              "toolbar_bg": "#f1f3f6",
+              "enable_publishing": false,
+              "hide_side_toolbar": false,
+              "allow_symbol_change": true,
+              "container_id": "tradingview_chart"
+            });
+          </script>
+        </div>
+      </div>
     </div>
   {% endif %}
+</div>
+
+<!-- Optional JS for dynamic stock updates -->
+<script>
+  const stockMap = {{ symbol_data|tojson }};
+  function updateStockList() {
+    const index = document.getElementById("index").value;
+    const symbolSelect = document.getElementById("symbol");
+    symbolSelect.innerHTML = '<option disabled selected value="">🔎 Start typing to search...</option>';
+    stockMap[index].forEach(stock => {
+      const option = document.createElement("option");
+      option.value = stock.Symbol;
+      option.text = `${stock.Symbol} - ${stock.Company}`;
+      option.title = stock.Sector;
+      symbolSelect.appendChild(option);
+    });
+  }
+</script>
 {% endblock %}

@@ -184,19 +184,39 @@ def account():
 
 @app.route("/chart", methods=["GET", "POST"])
 def chart():
+    import pandas as pd
+    from flask import request, render_template
     user = get_user_from_session_cookie()
-    symbol = None
 
-    if request.method == "POST":
-        raw = request.form["symbol"].strip().upper()
-        if raw.endswith(".L"):
-            symbol = f"LSE:{raw}"
-        elif raw in ["TSLA", "AAPL", "NVDA", "MSFT", "GOOGL"]:
-            symbol = f"NASDAQ:{raw}"
+    # Load symbol lists from CSVs
+    sp500_df = pd.read_csv("sp500_companies.csv")
+    ftse100_df = pd.read_csv("FTSE100_Constituents.csv")
+
+    # Create index-to-symbol mapping
+    symbol_data = {
+        "sp500": sp500_df[["Symbol", "Company", "Sector"]].to_dict(orient="records"),
+        "ftse100": ftse100_df[["Symbol", "Company", "Sector"]].to_dict(orient="records")
+    }
+
+    selected_index = request.form.get("index", "sp500")
+    selected_symbol = request.form.get("symbol")
+    full_symbol = None
+
+    if selected_symbol:
+        selected_symbol = selected_symbol.strip().upper()
+        if selected_symbol.endswith(".L"):
+            full_symbol = f"LSE:{selected_symbol}"
         else:
-            symbol = raw  # fallback
+            full_symbol = f"NASDAQ:{selected_symbol}" if selected_index == "sp500" else selected_symbol
 
-    return render_template("chart.html", user=user, symbol=symbol)
+    return render_template(
+        "chart.html",
+        user=user,
+        selected_index=selected_index,
+        selected_symbol=selected_symbol,
+        full_symbol=full_symbol,
+        symbol_data=symbol_data
+    )
 
 
 

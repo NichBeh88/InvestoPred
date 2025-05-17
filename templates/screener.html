@@ -18,8 +18,12 @@
     <label>Sector</label>
     <select name="sector" class="form-select">
       <option value="all" {% if sector_filter == 'all' %}selected{% endif %}>All</option>
-      {% for s in stocks|map(attribute='Sector')|unique %}
-        <option value="{{ s }}" {% if sector_filter == s %}selected{% endif %}>{{ s }}</option>
+      {% set seen_sectors = [] %}
+      {% for stock in stocks %}
+        {% if stock.Sector not in seen_sectors %}
+            <option value="{{ stock.Sector }}" {% if sector_filter == stock.Sector %}selected{% endif %}>{{ stock.Sector }}</option>
+            {% set _ = seen_sectors.append(stock.Sector) %}
+        {% endif %}
       {% endfor %}
     </select>
   </div>
@@ -103,13 +107,5 @@
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script>
-  $(document).ready(function() {
-    $('#predict_symbol').select2({
-      placeholder: "Search for a stock...",
-      allowClear: true
-    });
-  });
-</script>
 {% endblock %}
 
