@@ -6,6 +6,8 @@ from auth import (
     create_user  # ✅ Must be imported!
 )
 import os
+from tensorflow.keras.models import load_model
+model = load_model("PredictModel.keras")
 from dotenv import load_dotenv
 
 # 🔄 Load .env file
@@ -166,7 +168,6 @@ def screener():
     from firebase_admin import firestore
     import pandas as pd
     import numpy as np
-    from tensorflow.keras.models import load_model
     from sklearn.preprocessing import MinMaxScaler
     from datetime import datetime, timedelta
     import matplotlib
@@ -278,7 +279,7 @@ def screener():
         else:
             # 🔸 S&P500: Fetch live from FMP
             FMP_API_KEY = os.getenv("FMP_API_KEY")
-            fmp_url = f"https://financialmodelingprep.com/api/v3/historical-price-full/{selected_symbol}?serietype=line&apikey={FMP_API_KEY}&timeseries=2000"
+            fmp_url = f"https://financialmodelingprep.com/api/v3/historical-price-full/{selected_symbol}?serietype=line&apikey={FMP_API_KEY}&timeseries=1250"
             try:
                 resp = requests.get(fmp_url)
                 fmp_data = resp.json().get("historical", [])
@@ -308,8 +309,6 @@ def screener():
                 last_sequence = scaled_prices[-time_step:]
                 future_predictions = []
 
-                model = load_model("PredictModel.keras")
-
                 for _ in range(90):
                     input_seq = last_sequence.reshape(1, time_step, 1)
                     next_price = model.predict(input_seq, verbose=0)
@@ -332,6 +331,7 @@ def screener():
 
                 buf = io.BytesIO()
                 plt.savefig(buf, format="png")
+                plt.close(fig)
                 buf.seek(0)
                 plot_data = base64.b64encode(buf.read()).decode('utf-8')
                 prediction_plot = f"data:image/png;base64,{plot_data}"

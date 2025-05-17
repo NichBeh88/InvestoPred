@@ -1,0 +1,86 @@
+# ========================
+# General Python ignores
+# ========================
+__pycache__/
+*.py[cod]
+*.so
+*.pyd
+*.pyo
+*$py.class
+*.pyc
+*.log
+*.tmp
+*.bak
+
+# Compiled models / weights
+*.h5
+*.keras
+*.ckpt
+*.pkl
+
+# Jupyter
+.ipynb_checkpoints
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.Python
+
+# Build / Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+pip-log.txt
+htmlcov/
+.coverage
+.cache
+.pytest_cache/
+nosetests.xml
+coverage.xml
+
+# IDEs and Editor files
+.vscode/
+.idea/
+.spyproject/
+.ropeproject/
+
+# Flask / Web-specific
+instance/
+.webassets-cache
+.DS_Store
+site/
+
+# ========================
+# Project-Specific Security
+# ========================
+
+# Firebase admin credentials
+firebase-adminsdk.json
+firebase-credentials.json
+firebase_key.json
+*.firebase.json
+
+# Firebase environment secrets
+FIREBASE_CREDENTIALS_JSON
+secrets/
+*.example.json
+
+# Streamlit (if still exists)
+.streamlit/
+.streamlit/secrets.toml
+
+# Local config and secret keys
+.env
+.env.local
+.env.production
+.env.*.backup
+.env.*.bak
+
+# Render / deployment configs (if any)
+*.render.yaml
