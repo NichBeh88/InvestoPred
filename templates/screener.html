@@ -1,0 +1,142 @@
+{% extends "layout.html" %}
+
+{% block title %}Stock Screener{% endblock %}
+
+{% block content %}
+<h2>📊 Stock Screener</h2>
+
+<!-- ✅ Filter Form -->
+<form method="get" class="row g-3 align-items-end mb-4">
+  <div class="col-md-2">
+    <label>Index</label>
+    <select name="index_filter" class="form-select">
+      <option value="sp500" {% if index_filter == 'sp500' %}selected{% endif %}>S&P 500</option>
+      <option value="ftse100" {% if index_filter == 'ftse100' %}selected{% endif %}>FTSE 100</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label>Sector</label>
+    <select name="sector" class="form-select">
+      <option value="all" {% if sector_filter == 'all' %}selected{% endif %}>All</option>
+      {% for s in stocks|map(attribute='Sector')|unique %}
+        <option value="{{ s }}" {% if sector_filter == s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2">
+    <label>P/E Ratio</label>
+    <input type="number" step="0.1" name="pe_min" class="form-control mb-1" placeholder="Min" value="{{ pe_min or '' }}">
+    <input type="number" step="0.1" name="pe_max" class="form-control" placeholder="Max" value="{{ pe_max or '' }}">
+  </div>
+  <div class="col-md-2">
+    <label>EPS</label>
+    <input type="number" step="0.1" name="eps_min" class="form-control mb-1" placeholder="Min" value="{{ eps_min or '' }}">
+    <input type="number" step="0.1" name="eps_max" class="form-control" placeholder="Max" value="{{ eps_max or '' }}">
+  </div>
+  <div class="col-md-2">
+    <label>Price</label>
+    <input type="number" step="0.1" name="price_min" class="form-control mb-1" placeholder="Min" value="{{ price_min or '' }}">
+    <input type="number" step="0.1" name="price_max" class="form-control" placeholder="Max" value="{{ price_max or '' }}">
+  </div>
+  <div class="col-md-2">
+    <label>Dividend Yield (%)</label>
+    <input type="number" step="0.1" name="div_min" class="form-control mb-1" placeholder="Min" value="{{ div_min or '' }}">
+    <input type="number" step="0.1" name="div_max" class="form-control" placeholder="Max" value="{{ div_max or '' }}">
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+  </div>
+</form>
+
+{% if stocks %}
+<!-- ✅ Screener Table -->
+<div style="max-height: 500px; overflow-y: scroll;">
+  <table class="table table-hover table-sm">
+    <thead class="table-light">
+      <tr>
+        <th><a href="?sort=Symbol&direction={{ 'desc' if sort_key == 'Symbol' and sort_dir == 'asc' else 'asc' }}">Symbol</a></th>
+        <th><a href="?sort=CompanyName&direction={{ 'desc' if sort_key == 'CompanyName' and sort_dir == 'asc' else 'asc' }}">Company</a></th>
+        <th><a href="?sort=Sector&direction={{ 'desc' if sort_key == 'Sector' and sort_dir == 'asc' else 'asc' }}">Sector</a></th>
+        <th><a href="?sort=Price&direction={{ 'desc' if sort_key == 'Price' and sort_dir == 'asc' else 'asc' }}">Price</a></th>
+        <th><a href="?sort=EPS&direction={{ 'desc' if sort_key == 'EPS' and sort_dir == 'asc' else 'asc' }}">EPS</a></th>
+        <th><a href="?sort=PEratio&direction={{ 'desc' if sort_key == 'PEratio' and sort_dir == 'asc' else 'asc' }}">P/E</a></th>
+        <th><a href="?sort=DividendYield&direction={{ 'desc' if sort_key == 'DividendYield' and sort_dir == 'asc' else 'asc' }}">Dividend Yield</a></th>
+        {% if user %}<th>Watchlist</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for stock in stocks %}
+        <tr>
+          <td>{{ stock.Symbol }}</td>
+          <td>{{ stock.CompanyName }}</td>
+          <td>{{ stock.Sector }}</td>
+          <td>{{ stock.Price }}</td>
+          <td>{{ stock.EPS }}</td>
+          <td>{{ stock.PEratio }}</td>
+          <td>{{ stock.DividendYield }}</td>
+          {% if user %}
+          <td>
+            <form method="post" style="display:inline-flex; gap:4px">
+              <input type="hidden" name="action" value="add_watchlist">
+              <input type="hidden" name="symbol" value="{{ stock.Symbol }}">
+              <select name="watchlist_name" class="form-select form-select-sm">
+                {% for list_name in user_watchlists %}
+                  <option value="{{ list_name }}">{{ list_name }}</option>
+                {% endfor %}
+              </select>
+              <button class="btn btn-outline-success btn-sm" type="submit">+</button>
+            </form>
+          </td>
+          {% endif %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- ✅ Prediction Form with Select2 -->
+<form method="post" class="mt-4 row">
+  <div class="col-md-6">
+    <label for="predict_symbol">🔮 Predict for Stock:</label>
+    <select class="form-select" id="predict_symbol" name="predict_symbol" required>
+      {% for stock in stocks %}
+        <option value="{{ stock.Symbol }}" {% if selected_symbol == stock.Symbol %}selected{% endif %}>{{ stock.Symbol }} - {{ stock.CompanyName }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2 d-flex align-items-end">
+    <button type="submit" class="btn btn-success w-100">Predict</button>
+  </div>
+</form>
+
+{% if fetching_message %}
+  <div class="alert alert-info mt-3">{{ fetching_message }}</div>
+{% endif %}
+
+{% if prediction_plot %}
+  <div class="mt-4">
+    <h4>📈 90-Day Price Forecast for {{ selected_symbol }}</h4>
+    <img src="{{ prediction_plot }}" class="img-fluid" alt="Prediction Chart">
+    {% if forecast_csv %}
+      <a href="data:text/csv;charset=utf-8,{{ forecast_csv | urlencode }}" download="{{ selected_symbol }}_forecast.csv" class="btn btn-outline-primary mt-3">Download Forecast CSV</a>
+    {% endif %}
+  </div>
+{% endif %}
+{% else %}
+  <div class="alert alert-warning">No stocks match your filters.</div>
+{% endif %}
+
+<!-- ✅ Select2 JS + CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $('#predict_symbol').select2({
+      placeholder: "Search for a stock...",
+      allowClear: true
+    });
+  });
+</script>
+{% endblock %}
+

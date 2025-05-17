@@ -1,0 +1,13 @@
+flask
+firebase-admin
+requests
+pandas
+numpy
+yfinance
+plotly
+tensorflow
+scikit-learn
+matplotlib
+gunicorn
+
+

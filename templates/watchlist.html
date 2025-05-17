@@ -1,0 +1,114 @@
+{% extends "layout.html" %}
+
+{% block title %}My Watchlists{% endblock %}
+
+{% block content %}
+<h3>📌 Your Watchlists</h3>
+
+<form method="post" class="row g-3 mb-4 align-items-end">
+  <input type="hidden" name="action" value="create_list">
+  <div class="col-md-3">
+    <input type="text" name="create_name" class="form-control" placeholder="New Watchlist Name" required>
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-success">Create</button>
+  </div>
+</form>
+
+{% if selected_list %}
+<form method="post" class="row g-3 mb-4 align-items-end">
+  <input type="hidden" name="action" value="rename_list">
+  <input type="hidden" name="list_name" value="{{ selected_list }}">
+  <div class="col-md-4">
+    <input type="text" name="new_name" placeholder="Rename '{{ selected_list }}' to..." class="form-control" required>
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-warning">Rename</button>
+  </div>
+</form>
+{% endif %}
+
+<form method="get" class="row g-3 mb-4 align-items-end">
+  <div class="col-md-4">
+    <label for="selected_list">Select Watchlist:</label>
+    <select name="selected_list" class="form-select" onchange="this.form.submit()">
+      <option value="" disabled selected>Select a Watchlist</option>
+      {% for list_name in watchlists.keys() %}
+        <option value="{{ list_name }}" {% if selected_list == list_name %}selected{% endif %}>{{ list_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  {% if selected_list %}
+    <div class="col-md-2">
+      <form method="post">
+        <input type="hidden" name="action" value="delete_list">
+        <input type="hidden" name="list_name" value="{{ selected_list }}">
+        <button type="submit" class="btn btn-danger">Delete</button>
+      </form>
+    </div>
+  {% endif %}
+</form>
+
+{% if selected_list %}
+  <form method="get" class="row g-3 mb-4 align-items-end">
+    <input type="hidden" name="selected_list" value="{{ selected_list }}">
+    <div class="col-md-4">
+      <label for="index_filter">Select Index:</label>
+      <select name="index_filter" class="form-select" onchange="this.form.submit()">
+        <option value="all" {% if index_filter == 'all' %}selected{% endif %}>All</option>
+        <option value="sp500" {% if index_filter == 'sp500' %}selected{% endif %}>S&P 500</option>
+        <option value="ftse100" {% if index_filter == 'ftse100' %}selected{% endif %}>FTSE 100</option>
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label for="symbol">Add Stock:</label>
+      <input list="stocklist" name="symbol" class="form-control" placeholder="Enter Symbol or Company Name" required>
+      <datalist id="stocklist">
+        {% for stock in all_stocks %}
+          <option value="{{ stock.Symbol }}">{{ stock.CompanyName }}</option>
+        {% endfor %}
+      </datalist>
+    </div>
+    <div class="col-md-2">
+      <input type="hidden" name="action" value="add">
+      <input type="hidden" name="list_name" value="{{ selected_list }}">
+      <input type="hidden" name="index_filter" value="{{ index_filter }}">
+      <button type="submit" class="btn btn-primary w-100">Add</button>
+    </div>
+  </form>
+
+  <ul class="list-group mt-4">
+    {% for symbol in watchlists[selected_list] %}
+      <li class="list-group-item">
+        <div class="d-flex justify-content-between align-items-center">
+          <strong>{{ symbol }}</strong>
+          <form method="post" style="margin: 0;">
+            <input type="hidden" name="action" value="remove">
+            <input type="hidden" name="list_name" value="{{ selected_list }}">
+            <input type="hidden" name="symbol" value="{{ symbol }}">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Remove</button>
+          </form>
+        </div>
+        <div class="tradingview-widget-container mt-2">
+          <div id="tv_{{ selected_list }}_{{ symbol }}"></div>
+          <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+          <script type="text/javascript">
+            new TradingView.widget({
+              "width": "100%",
+              "height": 300,
+              "symbol": "{{ symbol }}",
+              "interval": "D",
+              "theme": "light",
+              "style": "1",
+              "container_id": "tv_{{ selected_list }}_{{ symbol }}"
+            });
+          </script>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}
+
+
+

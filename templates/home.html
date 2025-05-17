@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+  <div class="text-center">
+    {% if user %}
+      <h2>Welcome back, {{ user.email }} 👋</h2>
+      <p>You can now access your Watchlist, Compare Stocks, and more.</p>
+    {% else %}
+      <h2>Welcome to InvestoPred, the Stock Screening & Prediction App!</h2>
+      <p>Please <a href="/login">log in</a> or <a href="/signup">sign up</a> to access all features.</p>
+    {% endif %}
+  </div>
+{% endblock %}
