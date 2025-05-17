@@ -18,7 +18,7 @@
     <h5 class="text-success">📈 Top Gainers</h5>
     <ul class="list-group">
       {% for stock in gainers %}
-        <li class="list-group-item small">{{ stock.Symbol }} - {{ stock["% Change"] }}</li>
+        <li class="list-group-item small">{{ stock.symbol }} - {{ stock.changesPercentage }}</li>
       {% endfor %}
     </ul>
   </div>
@@ -26,7 +26,7 @@
     <h5 class="text-danger">📉 Top Losers</h5>
     <ul class="list-group">
       {% for stock in losers %}
-        <li class="list-group-item small">{{ stock.Symbol }} - {{ stock["% Change"] }}</li>
+        <li class="list-group-item small">{{ stock.symbol }} - {{ stock.changesPercentage }}</li>
       {% endfor %}
     </ul>
   </div>
@@ -34,7 +34,7 @@
     <h5 class="text-primary">🔥 Most Active</h5>
     <ul class="list-group">
       {% for stock in actives %}
-        <li class="list-group-item small">{{ stock.Symbol }} - {{ stock["Price (Intraday)"] }}</li>
+        <li class="list-group-item small">{{ stock.symbol }} - ${{ stock.price }}</li>
       {% endfor %}
     </ul>
   </div>
@@ -46,14 +46,15 @@
     <h4>🎯 Sample Predictions</h4>
     <div class="row justify-content-center">
       <div class="col-md-4">
-        <img src="/static/sample_aapl.png" class="img-fluid rounded" alt="Sample AAPL Prediction">
-        <p class="small mt-2">📊 AAPL - 90-Day Price Forecast</p>
+        <img src="/static/AMD.png" class="img-fluid rounded" alt="Sample AMD Prediction">
+        <p class="small mt-2">📊 AMD - 90-Day Price Forecast</p>
       </div>
       <div class="col-md-4">
-        <img src="/static/sample_nvda.png" class="img-fluid rounded" alt="Sample NVDA Prediction">
-        <p class="small mt-2">📊 NVDA - 90-Day Price Forecast</p>
+        <img src="/static/META.png" class="img-fluid rounded" alt="Sample META Prediction">
+        <p class="small mt-2">📊 META - 90-Day Price Forecast</p>
       </div>
     </div>
   </div>
 {% endif %}
 {% endblock %}
+
