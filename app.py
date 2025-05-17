@@ -293,15 +293,6 @@ def watchlist():
 def screener():
     from firebase_admin import firestore
     import pandas as pd
-    import numpy as np
-    from sklearn.preprocessing import MinMaxScaler
-    from datetime import datetime, timedelta
-    import matplotlib
-    matplotlib.use('Agg')
-    import matplotlib.pyplot as plt
-    import io
-    import base64
-    import requests
     import os
 
     db = firestore.client()
@@ -387,91 +378,6 @@ def screener():
             else:
                 wl_ref.set({"symbols": [symbol]})
 
-    prediction_plot = None
-    forecast_csv = None
-    selected_symbol = None
-    fetching_message = None
-
-    # ✅ Prediction trigger
-    if request.method == "POST" and request.form.get("predict_symbol"):
-        selected_symbol = request.form.get("predict_symbol", "").strip().upper()
-        data = {}
-
-        if selected_symbol.endswith(".L"):
-            # 🔹 FTSE100: Load from Firestore (already cached by daily Cloud Function)
-            doc = db.collection("stock_cache").document(selected_symbol).get()
-            if doc.exists:
-                data = doc.to_dict().get("historical_data", {})
-        else:
-            # 🔸 S&P500: Fetch live from FMP
-            FMP_API_KEY = os.getenv("FMP_API_KEY")
-            fmp_url = f"https://financialmodelingprep.com/api/v3/historical-price-full/{selected_symbol}?serietype=line&apikey={FMP_API_KEY}&timeseries=1250"
-            try:
-                resp = requests.get(fmp_url)
-                fmp_data = resp.json().get("historical", [])
-                for row in fmp_data:
-                    data[row["date"]] = {
-                        "Close": row["close"],
-                        "Open": row.get("open", row["close"]),
-                        "High": row.get("high", row["close"]),
-                        "Low": row.get("low", row["close"]),
-                        "Volume": row.get("volume", 0)
-                    }
-            except Exception as e:
-                fetching_message = f"⚠️ Failed to fetch from FMP: {e}"
-
-        # ✅ Run prediction if data is valid
-        if data and len(data) >= 1000:
-            df = pd.DataFrame.from_dict(data, orient="index")
-            df.index = pd.to_datetime(df.index)
-            df.sort_index(inplace=True)
-
-            if "Close" in df.columns:
-                prices = df[["Close"]].values
-                scaler = MinMaxScaler(feature_range=(0, 1))
-                scaled_prices = scaler.fit_transform(prices)
-
-                time_step = 60
-                last_sequence = scaled_prices[-time_step:]
-                future_predictions = []
-
-                for _ in range(90):
-                    input_seq = last_sequence.reshape(1, time_step, 1)
-                    next_price = model.predict(input_seq, verbose=0)
-                    next_price = np.maximum(next_price, 0)
-                    future_predictions.append(next_price[0, 0])
-                    last_sequence = np.append(last_sequence[1:], next_price, axis=0)
-
-                future_scaled = np.array(future_predictions).reshape(-1, 1)
-                future_prices = scaler.inverse_transform(future_scaled)
-
-                future_dates = pd.date_range(start=df.index[-1] + timedelta(days=1), periods=90)
-                forecast_df = pd.DataFrame({"Date": future_dates, "Predicted Price ($)": future_prices.flatten()})
-
-                fig, ax = plt.subplots(figsize=(10, 4))
-                ax.plot(future_dates, future_prices, color='green')
-                ax.set_title(f"{selected_symbol} - Predicted Stock Price (Next 90 Days)")
-                ax.set_xlabel("Date")
-                ax.set_ylabel("Price ($)")
-                ax.grid(True)
-
-                buf = io.BytesIO()
-                plt.savefig(buf, format="png")
-                plt.close(fig)
-                buf.seek(0)
-                plot_data = base64.b64encode(buf.read()).decode('utf-8')
-                prediction_plot = f"data:image/png;base64,{plot_data}"
-                forecast_csv = forecast_df.to_csv(index=False)
-        else:
-            # Optional fallback to trigger fetch
-            source = "yf" if selected_symbol.endswith(".L") else "fmp"
-            try:
-                cloud_url = f"https://us-central1-investopred.cloudfunctions.net/updateStockHistory?symbol={selected_symbol}&source={source}"
-                requests.get(cloud_url)
-                fetching_message = f"⏳ Fetching historical data for {selected_symbol} from {source.upper()}. Please retry in 30–60 seconds."
-            except Exception as e:
-                fetching_message = f"⚠️ Failed to trigger fetch from {source.upper()}: {e}"
-
     return render_template(
         "screener.html",
         stocks=filtered,
@@ -488,12 +394,114 @@ def screener():
         div_max=div_max,
         sort_key=sort_key,
         sort_dir=sort_dir,
-        selected_symbol=selected_symbol,
-        prediction_plot=prediction_plot,
-        forecast_csv=forecast_csv,
-        fetching_message=fetching_message,
         user=user,
         user_watchlists=user_watchlists
+    )
+
+
+
+
+@app.route("/predict/<symbol>")
+def predict(symbol):
+    from firebase_admin import firestore
+    import pandas as pd
+    import numpy as np
+    from sklearn.preprocessing import MinMaxScaler
+    from datetime import datetime, timedelta
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    import io
+    import base64
+    import os
+    import requests
+
+    db = firestore.client()
+    user = get_user_from_session_cookie()
+
+    selected_symbol = symbol.upper()
+    data = {}
+    prediction_plot = None
+    forecast_csv = None
+    fetching_message = None
+
+    if selected_symbol.endswith(".L"):
+        doc = db.collection("stock_cache").document(selected_symbol).get()
+        if doc.exists:
+            data = doc.to_dict().get("historical_data", {})
+    else:
+        FMP_API_KEY = os.getenv("FMP_API_KEY")
+        fmp_url = f"https://financialmodelingprep.com/api/v3/historical-price-full/{selected_symbol}?serietype=line&apikey={FMP_API_KEY}&timeseries=1250"
+        try:
+            resp = requests.get(fmp_url)
+            fmp_data = resp.json().get("historical", [])
+            for row in fmp_data:
+                data[row["date"]] = {
+                    "Close": row["close"],
+                    "Open": row.get("open", row["close"]),
+                    "High": row.get("high", row["close"]),
+                    "Low": row.get("low", row["close"]),
+                    "Volume": row.get("volume", 0)
+                }
+        except Exception as e:
+            fetching_message = f"⚠️ Failed to fetch from FMP: {e}"
+
+    if data and len(data) >= 1000:
+        df = pd.DataFrame.from_dict(data, orient="index")
+        df.index = pd.to_datetime(df.index)
+        df.sort_index(inplace=True)
+
+        if "Close" in df.columns:
+            prices = df[["Close"]].values
+            scaler = MinMaxScaler(feature_range=(0, 1))
+            scaled_prices = scaler.fit_transform(prices)
+
+            time_step = 60
+            last_sequence = scaled_prices[-time_step:]
+            future_predictions = []
+
+            for _ in range(90):
+                input_seq = last_sequence.reshape(1, time_step, 1)
+                next_price = model.predict(input_seq, verbose=0)
+                next_price = np.maximum(next_price, 0)
+                future_predictions.append(next_price[0, 0])
+                last_sequence = np.append(last_sequence[1:], next_price, axis=0)
+
+            future_scaled = np.array(future_predictions).reshape(-1, 1)
+            future_prices = scaler.inverse_transform(future_scaled)
+
+            future_dates = pd.date_range(start=df.index[-1] + timedelta(days=1), periods=90)
+            forecast_df = pd.DataFrame({"Date": future_dates, "Predicted Price ($)": future_prices.flatten()})
+
+            fig, ax = plt.subplots(figsize=(10, 4))
+            ax.plot(future_dates, future_prices, color='green')
+            ax.set_title(f"{selected_symbol} - Predicted Stock Price (Next 90 Days)")
+            ax.set_xlabel("Date")
+            ax.set_ylabel("Price ($)")
+            ax.grid(True)
+
+            buf = io.BytesIO()
+            plt.savefig(buf, format="png")
+            plt.close(fig)
+            buf.seek(0)
+            plot_data = base64.b64encode(buf.read()).decode('utf-8')
+            prediction_plot = f"data:image/png;base64,{plot_data}"
+            forecast_csv = forecast_df.to_csv(index=False)
+    else:
+        source = "yf" if selected_symbol.endswith(".L") else "fmp"
+        try:
+            cloud_url = f"https://us-central1-investopred.cloudfunctions.net/updateStockHistory?symbol={selected_symbol}&source={source}"
+            requests.get(cloud_url)
+            fetching_message = f"⏳ Fetching historical data for {selected_symbol} from {source.upper()}. Please retry in 30–60 seconds."
+        except Exception as e:
+            fetching_message = f"⚠️ Failed to trigger fetch: {e}"
+
+    return render_template("predict.html",
+        user=user,
+        symbol=selected_symbol,
+        prediction_plot=prediction_plot,
+        forecast_csv=forecast_csv,
+        fetching_message=fetching_message
     )
 
 

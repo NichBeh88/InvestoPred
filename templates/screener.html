@@ -75,56 +75,29 @@
           <td>{{ stock.PEratio }}</td>
           <td>{{ stock.DividendYield }}</td>
           {% if user %}
-          <td>
-            <form method="post" style="display:inline-flex; gap:4px">
-              <input type="hidden" name="action" value="add_watchlist">
-              <input type="hidden" name="symbol" value="{{ stock.Symbol }}">
-              <select name="watchlist_name" class="form-select form-select-sm">
-                {% for list_name in user_watchlists %}
-                  <option value="{{ list_name }}">{{ list_name }}</option>
-                {% endfor %}
-              </select>
-              <button class="btn btn-outline-success btn-sm" type="submit">+</button>
-            </form>
-          </td>
-          {% endif %}
+            <td>
+                <form method="post" style="display:inline-flex; gap:4px; margin-right: 5px;">
+                    <input type="hidden" name="action" value="add_watchlist">
+                    <input type="hidden" name="symbol" value="{{ stock.Symbol }}">
+                    <select name="watchlist_name" class="form-select form-select-sm">
+                    {% for list_name in user_watchlists %}
+                        <option value="{{ list_name }}">{{ list_name }}</option>
+                    {% endfor %}
+                    </select>
+                    <button class="btn btn-outline-success btn-sm" type="submit">+</button>
+                </form>
+            </td>
+            <td>
+                <a href="{{ url_for('predict', symbol=stock.Symbol) }}" class="btn btn-sm btn-primary">🔮 Predict</a>
+            </td>
+            {% endif %}
+
         </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
 
-<!-- ✅ Prediction Form with Select2 -->
-<form method="post" class="mt-4 row">
-  <div class="col-md-6">
-    <label for="predict_symbol">🔮 Predict for Stock:</label>
-    <select class="form-select" id="predict_symbol" name="predict_symbol" required>
-      {% for stock in stocks %}
-        <option value="{{ stock.Symbol }}" {% if selected_symbol == stock.Symbol %}selected{% endif %}>{{ stock.Symbol }} - {{ stock.CompanyName }}</option>
-      {% endfor %}
-    </select>
-  </div>
-  <div class="col-md-2 d-flex align-items-end">
-    <button type="submit" class="btn btn-success w-100">Predict</button>
-  </div>
-</form>
-
-{% if fetching_message %}
-  <div class="alert alert-info mt-3">{{ fetching_message }}</div>
-{% endif %}
-
-{% if prediction_plot %}
-  <div class="mt-4">
-    <h4>📈 90-Day Price Forecast for {{ selected_symbol }}</h4>
-    <img src="{{ prediction_plot }}" class="img-fluid" alt="Prediction Chart">
-    {% if forecast_csv %}
-      <a href="data:text/csv;charset=utf-8,{{ forecast_csv | urlencode }}" download="{{ selected_symbol }}_forecast.csv" class="btn btn-outline-primary mt-3">Download Forecast CSV</a>
-    {% endif %}
-  </div>
-{% endif %}
-{% else %}
-  <div class="alert alert-warning">No stocks match your filters.</div>
-{% endif %}
 
 <!-- ✅ Select2 JS + CSS -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />

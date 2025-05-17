@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block title %}Prediction - {{ symbol }}{% endblock %}
+
+{% block content %}
+<h3>📊 {{ symbol }} - 90-Day Forecast</h3>
+
+{% if fetching_message %}
+  <div class="alert alert-info">{{ fetching_message }}</div>
+{% endif %}
+
+{% if prediction_plot %}
+  <div class="mt-4">
+    <img src="{{ prediction_plot }}" class="img-fluid rounded" alt="Prediction Chart">
+    {% if forecast_csv %}
+      <a href="data:text/csv;charset=utf-8,{{ forecast_csv | urlencode }}" download="{{ symbol }}_forecast.csv" class="btn btn-outline-primary mt-3">Download Forecast CSV</a>
+    {% endif %}
+  </div>
+{% endif %}
+
+<a href="/screener" class="btn btn-secondary mt-4">← Back to Screener</a>
+{% endblock %}
