@@ -87,30 +87,34 @@ def watchlist():
     user_ref = db.collection("users").document(user_id)
     watchlist_ref = user_ref.collection("watchlists")
 
-    # Determine selected watchlist and index filter
-    selected_list = request.args.get("selected_list") or request.form.get("watchlist_name")
+    # ✅ Unified watchlist selector
+    selected_list = (
+        request.form.get("watchlist_name") or
+        request.form.get("list_name") or
+        request.form.get("selected_list") or
+        request.args.get("selected_list")
+    )
+
     index_filter = request.args.get("index_filter") or request.form.get("index_filter") or "all"
 
-    # Load screener index data
+    # 🔹 Load stocks by index
     sp500_doc = db.collection("screener_index").document("sp500").get().to_dict() or {}
     ftse_doc = db.collection("screener_index").document("ftse100").get().to_dict() or {}
 
-    # Filter stocks based on index selection
     sp500_stocks = sp500_doc.get("stocks", [])
     ftse_stocks = ftse_doc.get("stocks", [])
 
-    if index_filter == "sp500":
-        all_stocks = sp500_stocks
-    elif index_filter == "ftse100":
-        all_stocks = ftse_stocks
-    else:
-        all_stocks = sp500_stocks + ftse_stocks
+    all_stocks = {
+        "sp500": sp500_stocks,
+        "ftse100": ftse_stocks,
+        "all": sp500_stocks + ftse_stocks
+    }.get(index_filter, [])
 
-    # POST handling
+    # 🔁 POST actions
     if request.method == "POST":
         action = request.form.get("action")
-        new_name = request.form.get("new_name", "").strip()
         create_name = request.form.get("create_name", "").strip()
+        new_name = request.form.get("new_name", "").strip()
         symbol = request.form.get("symbol", "").strip().upper()
 
         if action == "create_list" and create_name:
@@ -121,20 +125,16 @@ def watchlist():
 
         elif selected_list:
             doc_ref = watchlist_ref.document(selected_list)
+            existing = doc_ref.get().to_dict() or {}
+            symbols = existing.get("symbols", [])
 
-            if action == "add":
-                existing = doc_ref.get().to_dict() or {}
-                symbols = existing.get("symbols", [])
-                if symbol and symbol not in symbols:
-                    symbols.append(symbol)
-                doc_ref.set({"symbols": symbols})
+            if action == "add" and symbol and symbol not in symbols:
+                symbols.append(symbol)
+                doc_ref.set({"symbols": symbols}, merge=True)
 
-            elif action == "remove":
-                existing = doc_ref.get().to_dict() or {}
-                symbols = existing.get("symbols", [])
-                if symbol in symbols:
-                    symbols.remove(symbol)
-                doc_ref.set({"symbols": symbols})
+            elif action == "remove" and symbol in symbols:
+                symbols.remove(symbol)
+                doc_ref.set({"symbols": symbols}, merge=True)
 
             elif action == "delete_list":
                 doc_ref.delete()
@@ -147,7 +147,7 @@ def watchlist():
                     doc_ref.delete()
                     selected_list = new_name
 
-    # Load user watchlists
+    # 📥 Load all watchlists
     docs = watchlist_ref.stream()
     watchlists = {doc.id: doc.to_dict().get("symbols", []) for doc in docs}
 
