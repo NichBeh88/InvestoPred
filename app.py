@@ -88,7 +88,7 @@ def watchlist():
     watchlist_ref = user_ref.collection("watchlists")
 
     # Determine selected watchlist and index filter
-    selected_list = request.args.get("selected_list") or request.form.get("list_name")
+    selected_list = request.args.get("selected_list") or request.form.get("watchlist_name")
     index_filter = request.args.get("index_filter") or request.form.get("index_filter") or "all"
 
     # Load screener index data

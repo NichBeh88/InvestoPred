@@ -28,7 +28,7 @@
 </form>
 {% endif %}
 
-<form method="get" class="row g-3 mb-4 align-items-end">
+<form method="post" class="row g-3 mb-4 align-items-end">
   <div class="col-md-4">
     <label for="selected_list">Select Watchlist:</label>
     <select name="selected_list" class="form-select" onchange="this.form.submit()">
@@ -42,7 +42,7 @@
     <div class="col-md-2">
       <form method="post">
         <input type="hidden" name="action" value="delete_list">
-        <input type="hidden" name="list_name" value="{{ selected_list }}">
+        <input type="hidden" name="watchlist_name" value="{{ selected_list }}">
         <button type="submit" class="btn btn-danger">Delete</button>
       </form>
     </div>
