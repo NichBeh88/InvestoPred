@@ -37,25 +37,30 @@ def enforce_session_timeout():
 
 @app.route("/")
 def home():
-    import pandas as pd
-    import yfinance as yf
+    import requests
+    import os
 
     user = get_user_from_session_cookie()
+    FMP_API_KEY = os.environ.get("FMP_API_KEY")
 
-    # Load latest market movers (U.S. market)
-    gainers = yf.get_day_gainers().head(10)
-    losers = yf.get_day_losers().head(10)
-    actives = yf.get_day_most_active().head(10)
+    def fetch_fmp(endpoint):
+        url = f"https://financialmodelingprep.com/api/v3/{endpoint}?apikey={FMP_API_KEY}"
+        try:
+            response = requests.get(url)
+            data = response.json()
+            return data[:10]  # return top 10 entries
+        except:
+            return []
 
-    # Convert to list of dicts for template use
-    def df_to_list(df):
-        return df[["Symbol", "Name", "Price (Intraday)", "% Change"]].to_dict(orient="records")
+    gainers = fetch_fmp("stock_market/gainers")
+    losers = fetch_fmp("stock_market/losers")
+    actives = fetch_fmp("stock_market/actives")
 
     return render_template("home.html",
         user=user,
-        gainers=df_to_list(gainers),
-        losers=df_to_list(losers),
-        actives=df_to_list(actives)
+        gainers=gainers,
+        losers=losers,
+        actives=actives
     )
 
 
