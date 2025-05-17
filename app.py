@@ -10,6 +10,7 @@ from tensorflow.keras.models import load_model
 model = load_model("PredictModel.keras")
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
+import re
 
 # 🔄 Load .env file
 load_dotenv()
@@ -84,6 +85,25 @@ def login():
 
 
 
+@app.route("/reset-password", methods=["GET", "POST"])
+def reset_password():
+    from auth import send_password_reset_email
+
+    success = None
+    error = None
+
+    if request.method == "POST":
+        email = request.form.get("email")
+        if send_password_reset_email(email):
+            success = "Reset link sent! Please check your email."
+        else:
+            error = "Failed to send reset email. Please check your email address."
+
+    return render_template("reset_password.html", success=success, error=error)
+
+
+
+
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
@@ -102,6 +122,63 @@ def signup():
 def logout():
     session.clear()
     return redirect(url_for("home"))
+
+
+
+def is_strong_password(pwd):
+    return (
+        len(pwd) >= 8 and
+        re.search(r"[A-Z]", pwd) and
+        re.search(r"[a-z]", pwd) and
+        re.search(r"\d", pwd) and
+        re.search(r"[!@#$%^&*(),.?\":{}|<>]", pwd)
+    )
+
+
+
+@app.route("/account", methods=["GET", "POST"])
+def account():
+    from auth import get_user_from_session_cookie, change_password
+    import os
+    import requests
+
+    user = get_user_from_session_cookie()
+    if not user:
+        return redirect(url_for("login"))
+
+    success = None
+    error = None
+
+    if request.method == "POST":
+        new_password = request.form.get("new_password")
+
+        if not is_strong_password(new_password):
+            error = "Password must be at least 8 characters long and include uppercase, lowercase, number, and symbol."
+        else:
+            # ✅ Get Firebase ID token to authorize password change
+            FIREBASE_API_KEY = os.environ.get("FIREBASE_API_KEY")
+            email = user["email"]
+            url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_API_KEY}"
+            resp = requests.post(url, json={
+                "email": email,
+                "password": request.form.get("current_password", "fake"),
+                "returnSecureToken": True
+            }).json()
+
+            id_token = resp.get("idToken")
+
+            if not id_token:
+                error = "Session expired. Please log in again."
+                session.clear()
+                return redirect(url_for("login"))
+
+            # ✅ Attempt to change password
+            if change_password(id_token, new_password):
+                success = "Password updated successfully."
+            else:
+                error = "Failed to update password. Please try again."
+
+    return render_template("account.html", user=user, success=success, error=error)
 
 
 

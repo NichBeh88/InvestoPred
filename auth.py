@@ -85,3 +85,36 @@ def send_verification_email(id_token):
         "idToken": id_token
     }
     requests.post(url, json=data)
+
+
+# ✅ Send a password reset email
+def send_password_reset_email(email):
+    try:
+        FIREBASE_API_KEY = os.environ.get("FIREBASE_API_KEY")
+        url = f"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={FIREBASE_API_KEY}"
+        data = {
+            "requestType": "PASSWORD_RESET",
+            "email": email
+        }
+        response = requests.post(url, json=data).json()
+        if "email" in response:
+            return True
+        return False
+    except:
+        return False
+
+
+# ✅ Change password for a logged-in user
+def change_password(id_token, new_password):
+    try:
+        FIREBASE_API_KEY = os.environ.get("FIREBASE_API_KEY")
+        url = f"https://identitytoolkit.googleapis.com/v1/accounts:update?key={FIREBASE_API_KEY}"
+        data = {
+            "idToken": id_token,
+            "password": new_password,
+            "returnSecureToken": True
+        }
+        response = requests.post(url, json=data).json()
+        return "idToken" in response
+    except:
+        return False

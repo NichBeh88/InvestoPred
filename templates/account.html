@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block title %}My Account{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 600px;">
+  <h3 class="mb-4">🔐 Manage Your Account</h3>
+
+  {% if success %}
+    <div class="alert alert-success">{{ success }}</div>
+  {% endif %}
+  {% if error %}
+    <div class="alert alert-danger">{{ error }}</div>
+  {% endif %}
+
+  <form method="post">
+    <input type="hidden" name="action" value="change_password">
+    <div class="mb-3">
+      <label for="new_password" class="form-label">New Password</label>
+      <input type="password" name="new_password" class="form-control" required
+        pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}"
+        title="At least 8 characters, with uppercase, lowercase, number, and special character"
+        placeholder="Enter new password">
+    </div>
+    <button type="submit" class="btn btn-primary">Update Password</button>
+  </form>
+</div>
+{% endblock %}
