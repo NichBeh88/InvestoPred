@@ -9,6 +9,7 @@ import os
 from tensorflow.keras.models import load_model
 model = load_model("PredictModel.keras")
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
 
 # 🔄 Load .env file
 load_dotenv()
@@ -19,10 +20,25 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 # 🔐 Initialize Firebase
 init_firebase()
 
+@app.before_request
+def enforce_session_timeout():
+    if 'user' in session:
+        now = datetime.utcnow()
+        last_active = session.get('last_activity')
+        if last_active:
+            elapsed = now - datetime.fromisoformat(last_active)
+            if elapsed > timedelta(minutes=15):
+                session.clear()
+                return redirect(url_for("login"))
+        session['last_activity'] = now.isoformat()
+
+
+
 @app.route("/")
 def home():
     user = get_user_from_session_cookie()
     return render_template("home.html", user=user)
+
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -30,11 +46,17 @@ def login():
     if request.method == "POST":
         email = request.form["email"]
         password = request.form["password"]
-        if verify_password_and_login(email, password):
+        result = verify_password_and_login(email, password)
+
+        if result == "unverified":
+            return render_template("login.html", error="⚠️ Please verify your email before logging in.")
+        elif result is True:
             return redirect(url_for("home"))
         else:
-            return render_template("login.html", error="Invalid email or password")
+            return render_template("login.html", error="❌ Invalid email or password")
+    
     return render_template("login.html", error=None)
+
 
 
 @app.route("/signup", methods=["GET", "POST"])
@@ -50,10 +72,12 @@ def signup():
     return render_template("signup.html", error=None, success=None)
 
 
+
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("home"))
+
 
 
 @app.route("/chart", methods=["GET", "POST"])
