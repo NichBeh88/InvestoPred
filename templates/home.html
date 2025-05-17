@@ -3,13 +3,57 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-  <div class="text-center">
-    {% if user %}
-      <h2>Welcome back, {{ user.email }} 👋</h2>
-      <p>You can now access your Watchlist, Compare Stocks, and more.</p>
-    {% else %}
-      <h2>Welcome to InvestoPred, the Stock Screening & Prediction App!</h2>
-      <p>Please <a href="/login">log in</a> or <a href="/signup">sign up</a> to access all features.</p>
-    {% endif %}
+<div class="text-center mb-4">
+  {% if user %}
+    <h2>Welcome back, {{ user.email }} 👋</h2>
+    <p>You can now access your Watchlist, Compare Stocks, and more.</p>
+  {% else %}
+    <h2>Welcome to InvestoPred, the Stock Screening & Prediction App!</h2>
+    <p>Please <a href="/login">log in</a> or <a href="/signup">sign up</a> to access all features.</p>
+  {% endif %}
+</div>
+
+<div class="row text-center">
+  <div class="col-md-4">
+    <h5 class="text-success">📈 Top Gainers</h5>
+    <ul class="list-group">
+      {% for stock in gainers %}
+        <li class="list-group-item small">{{ stock.Symbol }} - {{ stock["% Change"] }}</li>
+      {% endfor %}
+    </ul>
   </div>
+  <div class="col-md-4">
+    <h5 class="text-danger">📉 Top Losers</h5>
+    <ul class="list-group">
+      {% for stock in losers %}
+        <li class="list-group-item small">{{ stock.Symbol }} - {{ stock["% Change"] }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="col-md-4">
+    <h5 class="text-primary">🔥 Most Active</h5>
+    <ul class="list-group">
+      {% for stock in actives %}
+        <li class="list-group-item small">{{ stock.Symbol }} - {{ stock["Price (Intraday)"] }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+{% if not user %}
+  <hr class="my-5">
+  <div class="text-center">
+    <h4>🎯 Sample Predictions</h4>
+    <div class="row justify-content-center">
+      <div class="col-md-4">
+        <img src="/static/sample_aapl.png" class="img-fluid rounded" alt="Sample AAPL Prediction">
+        <p class="small mt-2">📊 AAPL - 90-Day Price Forecast</p>
+      </div>
+      <div class="col-md-4">
+        <img src="/static/sample_nvda.png" class="img-fluid rounded" alt="Sample NVDA Prediction">
+        <p class="small mt-2">📊 NVDA - 90-Day Price Forecast</p>
+      </div>
+    </div>
+  </div>
+{% endif %}
 {% endblock %}

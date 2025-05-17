@@ -18,11 +18,26 @@ def init_firebase():
 # ✅ Create user with verification email
 def create_user(email, password):
     try:
-        user = firebase_auth.create_user(email=email, password=password)
-        firebase_auth.send_email_verification(user.uid)
+        FIREBASE_API_KEY = os.environ.get("FIREBASE_API_KEY")
+        # Sign up the user via REST API (to get ID token)
+        url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={FIREBASE_API_KEY}"
+        data = {
+            "email": email,
+            "password": password,
+            "returnSecureToken": True
+        }
+        response = requests.post(url, json=data).json()
+
+        id_token = response.get("idToken")
+        if not id_token:
+            return False, response.get("error", {}).get("message", "Signup failed.")
+
+        send_verification_email(id_token)
         return True, None
+
     except Exception as e:
         return False, str(e)
+
 
 # ✅ Login only if verified
 def verify_password_and_login(email, password):
@@ -60,3 +75,13 @@ def get_user_from_session_cookie():
 # ✅ Clear session on logout
 def track_session_activity():
     session["last_activity"] = datetime.utcnow().isoformat()
+
+
+def send_verification_email(id_token):
+    FIREBASE_API_KEY = os.environ.get("FIREBASE_API_KEY")
+    url = f"https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key={FIREBASE_API_KEY}"
+    data = {
+        "requestType": "VERIFY_EMAIL",
+        "idToken": id_token
+    }
+    requests.post(url, json=data)
